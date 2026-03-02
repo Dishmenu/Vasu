@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Menu - Reddy Gari Biryani</title>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+.menu-page {
+  padding: 40px 6% 120px;
+  background: #fff;
+}
+
+/* SEARCH */
+.menu-search-box {
+  text-align: center;
+  margin-bottom: 25px;
+}
+.menu-search-box input {
+  width: 100%;
+  max-width: 560px;
+  padding: 14px 20px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: 2px solid #ddd;
+}
+
+/* CATEGORY FILTER */
+.menu-categories {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 20px;
+}
+.menu-categories::-webkit-scrollbar { display: none; }
+
+.cat-btn {
+  padding: 10px 18px;
+  border-radius: 22px;
+  border: 2px solid #ddd;
+  background: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cat-btn.active {
+  background: #c62828;
+  border-color: #c62828;
+  color: #fff;
+}
+
+/* GRID */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 26px;
+}
+
+/* CARD BASE */
+/* CARD BASE */
+.menu-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* CENTER DESKTOP CONTENT */
+  text-align: center;
+  gap: 14px;
+}
+
+/* IMAGE DESKTOP */
+.menu-img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+/* NAME */
+.menu-info h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.short-desc {
+  font-size: 14px;
+  color: #666;
+  margin: 4px 0 10px;
+  line-height: 1.4;
+}
+/* PRICE + QTY ROW */
+.row-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* PRICE */
+.price {
+  font-size: 20px;
+  font-weight: 700;
+  color: #c62828;
+}
+
+/* QTY */
+.qty-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.qty-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  background: #c62828;
+  color: #fff;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+.qty-input {
+  width: 45px;
+  text-align: center;
+  padding: 4px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 2px solid #ddd;
+}
+
+/* ADD BUTTON */
+.addcart-btn {
+  width: 100%;
+  background: #c62828;
+  padding: 10px 0;
+  border-radius: 12px;
+  border: none;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* 📱 MOBILE SPLIT VIEW */
+@media (max-width: 768px) {
+
+  .menu-card {
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .menu-img {
+    width: 120px;
+    height: 120px;
+  }
+
+  .menu-info {
+    flex: 1;
+  }
+
+  .row-info {
+    gap: 10px;
+    justify-content: flex-start;
+  }
+}
+/* FLOATING CART */
+.floating-cart {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #c62828;
+  color: #fff;
+  font-size: 26px;
+  padding: 16px;
+  border-radius: 50%;
+  text-decoration: none;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.15);
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px){
+  .menu-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px){
+  .menu-grid { grid-template-columns: repeat(1, 1fr); }
+
+  .menu-card {
+    flex-direction: row;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .menu-img {
+    width: 120px;
+    height: 120px;
+  }
+  .short-desc {
+    font-size: 13px;
+    margin: 2px 0 6px;
+  }
+}
+@media (max-width: 480px){
+  .menu-img {
+    width: 100px;
+    height: 100px;
+  }
+}
+/* CART COUNT BADGE */
+.floating-cart {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #c62828;
+  color: white;
+  font-size: 26px;
+  padding: 16px;
+  border-radius: 50%;
+  text-decoration: none;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.15);
+}
+
+#cartCount {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #ffcc00;
+  color: #000;
+  font-size: 14px;
+  font-weight: 700;
+  min-width: 22px;
+  height: 22px;
+  padding: 2px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#toast {
+  position: fixed;
+  bottom: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #c62828;
+  color: white;
+  padding: 14px 22px;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: 0.4s;
+  z-index: 9999;
+}
+#toast.show {
+  bottom: 30px;
+}
+</style>
+</head>
+<body>
+
+<section class="menu-page">
+
+  <!-- Search -->
+  <div class="menu-search-box">
+    <input type="text" id="searchInput" placeholder="Search for biryani, fry items..." />
+  </div>
+
+  <!-- Category Tabs -->
+  <div class="menu-categories">
+    <button class="cat-btn active" data-category="all">All</button>
+    <button class="cat-btn" data-category="biryani">Biryani</button>
+    <button class="cat-btn" data-category="starters">Starters</button>
+    <button class="cat-btn" data-category="fry">Fry Items</button>
+    <button class="cat-btn" data-category="family">Family Packs</button>
+    <button class="cat-btn" data-category="drinks">Drinks</button>
+  </div>
+
+  <!-- Menu Grid -->
+  <div class="menu-grid" id="menuGrid">
+
+    <!-- 10 PRODUCTS -->
+
+    <!-- 1 -->
+    <div class="menu-card" data-category="biryani" data-price="180">
+      <img class="menu-img" src="assets/menu/chicken-dum.jpg" alt="">
+      <div class="menu-info">
+        <h3>Chicken Dum Biryani</h3>
+        <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
+        <div class="row-info">
+          <p class="price">₹180</p>
+          <div class="qty-row">
+            <button class="qty-btn minus">-</button>
+            <input type="number" class="qty-input" value="1" min="1">
+            <button class="qty-btn plus">+</button>
+          </div>
+        </div>
+        <button class="addcart-btn">Add to Cart</button>
+      </div>
+    </div>
+    <!-- 2 -->
+    <div class="menu-card" data-category="Starters" data-price="180">
+      <img class="menu-img" src="assets/menu/chicken-dum.jpg" alt="">
+      <div class="menu-info">
+        <h3>Chicken Dum Biryani</h3>
+        <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
+        <div class="row-info">
+          <p class="price">₹180</p>
+          <div class="qty-row">
+            <button class="qty-btn minus">-</button>
+            <input type="number" class="qty-input" value="1" min="1">
+            <button class="qty-btn plus">+</button>
+          </div>
+        </div>
+        <button class="addcart-btn">Add to Cart</button>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="menu-card" data-category="biryani" data-price="180">
+      <img class="menu-img" src="assets/menu/chicken-dum.jpg" alt="">
+      <div class="menu-info">
+        <h3>Chicken Dum Biryani</h3>
+        <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
+        <div class="row-info">
+          <p class="price">₹180</p>
+          <div class="qty-row">
+            <button class="qty-btn minus">-</button>
+            <input type="number" class="qty-input" value="1" min="1">
+            <button class="qty-btn plus">+</button>
+          </div>
+        </div>
+        <button class="addcart-btn">Add to Cart</button>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="menu-card" data-category="biryani" data-price="180">
+      <img class="menu-img" src="assets/menu/chicken-dum.jpg" alt="">
+      <div class="menu-info">
+        <h3>Chicken Dum Biryani</h3>
+        <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
+        <div class="row-info">
+          <p class="price">₹180</p>
+          <div class="qty-row">
+            <button class="qty-btn minus">-</button>
+            <input type="number" class="qty-input" value="1" min="1">
+            <button class="qty-btn plus">+</button>
+          </div>
+        </div>
+        <button class="addcart-btn">Add to Cart</button>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="menu-card" data-category="biryani" data-price="180">
+      <img class="menu-img" src="assets/menu/chicken-dum.jpg" alt="">
+      <div class="menu-info">
+        <h3>Chicken Dum Biryani</h3>
+        <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
+        <div class="row-info">
+          <p class="price">₹180</p>
+          <div class="qty-row">
+            <button class="qty-btn minus">-</button>
+            <input type="number" class="qty-input" value="1" min="1">
+            <button class="qty-btn plus">+</button>
+          </div>
+        </div>
+        <button class="addcart-btn">Add to Cart</button>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="menu-card" data-category="biryani" data-price="180">
+      <img class="menu-img" src="assets/menu/chicken-dum.jpg" alt="">
+      <div class="menu-info">
+        <h3>Chicken Dum Biryani</h3>
+        <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
+        <div class="row-info">
+          <p class="price">₹180</p>
+          <div class="qty-row">
+            <button class="qty-btn minus">-</button>
+            <input type="number" class="qty-input" value="1" min="1">
+            <button class="qty-btn plus">+</button>
+          </div>
+        </div>
+        <button class="addcart-btn">Add to Cart</button>
+      </div>
+    </div>
+
+
+    <!-- 7 -->
+    <div class="menu-card" data-category="biryani" data-price="180">
+      <img class="menu-img" src="assets/menu/chicken-dum.jpg" alt="">
+      <div class="menu-info">
+        <h3>Chicken Dum Biryani</h3>
+        <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
+        <div class="row-info">
+          <p class="price">₹180</p>
+          <div class="qty-row">
+            <button class="qty-btn minus">-</button>
+            <input type="number" class="qty-input" value="1" min="1">
+            <button class="qty-btn plus">+</button>
+          </div>
+        </div>
+        <button class="addcart-btn">Add to Cart</button>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="menu-card" data-category="biryani" data-price="180">
+      <img class="menu-img" src="assets/menu/chicken-dum.jpg" alt="">
+      <div class="menu-info">
+        <h3>Chicken Dum Biryani</h3>
+        <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
+        <div class="row-info">
+          <p class="price">₹180</p>
+          <div class="qty-row">
+            <button class="qty-btn minus">-</button>
+            <input type="number" class="qty-input" value="1" min="1">
+            <button class="qty-btn plus">+</button>
+          </div>
+        </div>
+        <button class="addcart-btn">Add to Cart</button>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="menu-card" data-category="biryani" data-price="180">
+      <img class="menu-img" src="assets/menu/chicken-dum.jpg" alt="">
+      <div class="menu-info">
+        <h3>Chicken Dum Biryani</h3>
+        <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
+        <div class="row-info">
+          <p class="price">₹180</p>
+          <div class="qty-row">
+            <button class="qty-btn minus">-</button>
+            <input type="number" class="qty-input" value="1" min="1">
+            <button class="qty-btn plus">+</button>
+          </div>
+        </div>
+        <button class="addcart-btn">Add to Cart</button>
+      </div>
+    </div>
+    <!-- 10 -->
+    <div class="menu-card" data-category="biryani" data-price="180">
+      <img class="menu-img" src="assets/menu/chicken-dum.jpg" alt="">
+      <div class="menu-info">
+        <h3>Chicken Dum Biryani</h3>
+        <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
+        <div class="row-info">
+          <p class="price">₹180</p>
+          <div class="qty-row">
+            <button class="qty-btn minus">-</button>
+            <input type="number" class="qty-input" value="1" min="1">
+            <button class="qty-btn plus">+</button>
+          </div>
+        </div>
+        <button class="addcart-btn">Add to Cart</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Floating Cart Button -->
+  <a href="cart.html" class="floating-cart">🛒<span id="cartCount">0</span></a>
+
+</section>
+<div id="toast">Added to cart</div>
+<script>
+const searchInput = document.getElementById("searchInput");
+const menuCards = document.querySelectorAll(".menu-card");
+const categoryBtns = document.querySelectorAll(".cat-btn");
+
+/* CATEGORY FILTER */
+categoryBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    categoryBtns.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const cat = btn.dataset.category;
+
+    menuCards.forEach(card => {
+      const itemCat = card.dataset.category;
+      card.style.display = (cat === "all" || itemCat === cat) ? "flex" : "none";
+    });
+  });
+});
+
+/* LIVE SEARCH */
+searchInput.addEventListener("input", () => {
+  const val = searchInput.value.toLowerCase();
+
+  menuCards.forEach(card => {
+    const name = card.querySelector("h3").textContent.toLowerCase();
+    card.style.display = name.includes(val) ? "flex" : "none";
+  });
+});
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 1700);
+}
+/* QTY + / - BEHAVIOUR */
+document.querySelectorAll('.menu-card').forEach(card => {
+
+  const basePrice = parseInt(card.dataset.price);
+  const priceEl = card.querySelector('.price');
+  const qtyInput = card.querySelector('.qty-input');
+  const plus = card.querySelector('.plus');
+  const minus = card.querySelector('.minus');
+
+  function updatePrice() {
+    let qty = parseInt(qtyInput.value);
+    if (qty < 1) qty = 1;
+    priceEl.textContent = "₹" + (qty * basePrice);
+  }
+
+  plus.addEventListener('click', () => {
+    qtyInput.value = parseInt(qtyInput.value) + 1;
+    updatePrice();
+  });
+
+  minus.addEventListener('click', () => {
+    if (qtyInput.value > 1) {
+      qtyInput.value = parseInt(qtyInput.value) - 1;
+    }
+    updatePrice();
+  });
+
+  qtyInput.addEventListener('input', updatePrice);
+});
+document.querySelectorAll(".menu-card").forEach(card => {
+  
+  const addBtn = card.querySelector(".addcart-btn");
+
+  addBtn.addEventListener("click", () => {
+    const name = card.querySelector("h3").textContent;
+    const img = card.querySelector(".menu-img").src;
+    const price = parseInt(card.dataset.price);
+    const qty = parseInt(card.querySelector(".qty-input").value);
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart.push({ name, img, price, qty });
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    updateCartCount();
+    showToast(name + " added to cart");
+
+  });
+
+});
+function updateCartCount() {
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  document.getElementById("cartCount").textContent = cart.length;
+}
+
+updateCartCount();
+</script>
+</body>
+</html>
