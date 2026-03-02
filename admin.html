@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+
+<style>
+body{
+  font-family: Poppins, sans-serif;
+  background:#fff9f3;
+  padding:20px;
+}
+
+/* LOGIN BOX */
+#loginBox {
+  max-width:350px;
+  margin:80px auto;
+  background:white;
+  padding:25px;
+  border-radius:14px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.1);
+  display:none;
+}
+
+#loginBox input {
+  width:100%;
+  padding:14px;
+  margin-top:15px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+
+#loginBox button {
+  width:100%;
+  padding:14px;
+  margin-top:20px;
+  background:#c62828;
+  color:white;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+/* DASHBOARD */
+#adminPanel { display:none; }
+
+.logout-btn{
+  background:#c62828;
+  color:white;
+  border:none;
+  padding:10px 16px;
+  border-radius:8px;
+  float:right;
+}
+
+.order-box{
+  background:white;
+  padding:18px;
+  margin-bottom:12px;
+  border-radius:12px;
+  box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+
+button{
+  margin:4px;
+  padding:8px 12px;
+  border:none;
+  background:#c62828;
+  color:white;
+  border-radius:6px;
+}
+</style>
+
+</head>
+<body>
+
+<audio id="alertSound" src="alert.mp3" preload="auto"></audio>
+
+<!-- LOGIN FORM -->
+<div id="loginBox">
+  <h2>Admin Login</h2>
+  <input id="password" type="password" placeholder="Enter Admin Password">
+  <button onclick="loginAdmin()">Login</button>
+  <p id="errorMsg" style="color:red;margin-top:10px;"></p>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel">
+  <div class="top-bar">
+      <h2>New Orders</h2>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <div id="ordersList"></div>
+</div>
+
+
+<script type="module">
+
+/* ===================================================
+   FIREBASE IMPORTS
+=================================================== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
+import {
+  getFirestore, collection, onSnapshot, doc,
+  updateDoc, deleteDoc, getDoc, setDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+/* ===================================================
+   FIREBASE CONFIG
+=================================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
+  authDomain: "reddy-gari-biryani.firebaseapp.com",
+  projectId: "reddy-gari-biryani",
+  storageBucket: "reddy-gari-biryani.appspot.com",
+  messagingSenderId: "83117980930",
+  appId: "1:83117980930:web:5672bbedf6f8aafb88961b"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
+/* ===================================================
+   PAGE LOADING MODE
+=================================================== */
+const loginBox = document.getElementById("loginBox");
+const adminPanel = document.getElementById("adminPanel");
+const audio = document.getElementById("alertSound");
+
+
+/* ===================================================
+   SHOW CORRECT VIEW
+=================================================== */
+function updateView() {
+  if (localStorage.getItem("adminAuth") === "LOGGED_IN") {
+    loginBox.style.display = "none";
+    adminPanel.style.display = "block";
+  } else {
+    loginBox.style.display = "block";
+    adminPanel.style.display = "none";
+  }
+}
+
+updateView();
+
+
+/* ===================================================
+   LOGIN FUNCTION
+=================================================== */
+window.loginAdmin = function () {
+  const pass = document.getElementById("password").value.trim();
+  const correctPassword = "ReddyAdmin123";
+
+  if (pass === correctPassword) {
+
+    // unlock audio
+    audio.play().catch(()=>{});
+    audio.pause();
+    audio.currentTime = 0;
+
+    localStorage.setItem("adminAuth", "LOGGED_IN");
+    updateView();
+    initializeAdmin();
+  } else {
+    document.getElementById("errorMsg").innerText = "Incorrect password!";
+  }
+};
+
+
+/* ===================================================
+   LOGOUT FUNCTION
+=================================================== */
+window.logout = function () {
+  localStorage.removeItem("adminAuth");
+  updateView();
+};
+
+
+/* ===================================================
+   REALTIME ADMIN INITIALIZATION
+=================================================== */
+let initialized = false;
+
+function initializeAdmin() {
+  if (initialized) return;
+  initialized = true;
+
+  const ordersList = document.getElementById("ordersList");
+
+  let firstLoad = true;
+  let lastCount = 0;
+
+  onSnapshot(collection(db, "orders"), (snapshot) => {
+
+    const count = snapshot.size;
+
+    // Play alert for new orders
+    if (!firstLoad && count > lastCount) {
+      audio.currentTime = 0;
+      audio.play();
+    }
+
+    firstLoad = false;
+    lastCount = count;
+
+    ordersList.innerHTML = "";
+
+    snapshot.docs.forEach(docSnap => {
+      const data = docSnap.data();
+
+      ordersList.innerHTML += `
+        <div class="order-box">
+          <h3>Order ID: ${docSnap.id}</h3>
+
+          <p><b>Name:</b> ${data.name}</p>
+          <p><b>Phone:</b> ${data.phone}</p>
+          <p><b>Address:</b> ${data.address}</p>
+
+          <b>Items:</b>
+          <ul>
+            ${data.items.map(i => `<li>${i.name} × ${i.qty}</li>`).join("")}
+          </ul>
+
+          <p><b>Total:</b> ₹${data.total}</p>
+          <p><b>Status:</b> ${data.status}</p>
+
+          <button onclick="updateStatus('${docSnap.id}','accepted')">Accept</button>
+          <button onclick="updateStatus('${docSnap.id}','preparing')">Preparing</button>
+          <button onclick="updateStatus('${docSnap.id}','out_for_delivery')">Out For Delivery</button>
+          <button onclick="markDelivered('${docSnap.id}')">Delivered</button>
+        </div>
+      `;
+    });
+
+  });
+
+}
+
+
+/* ===================================================
+   AUTO-INITIALIZE ADMIN IF LOGGED IN
+=================================================== */
+if (localStorage.getItem("adminAuth") === "LOGGED_IN") {
+  initializeAdmin();
+}
+
+
+/* ===================================================
+   STATUS UPDATE
+=================================================== */
+window.updateStatus = async function (id, status) {
+  await updateDoc(doc(db, "orders", id), { status });
+};
+
+
+/* ===================================================
+   DELIVERED → COMPRESSED HISTORY
+=================================================== */
+window.markDelivered = async function (id) {
+
+  const ref = doc(db, "orders", id);
+  const snap = await getDoc(ref);
+
+  if (!snap.exists()) return;
+
+  const o = snap.data();
+
+  const compressed = {
+    orderId: id,
+    name: o.name,
+    phone: o.phone,
+    total: o.total,
+    date: Date.now(),
+    status: "delivered"
+  };
+
+  await setDoc(doc(db, "orders_history", id), compressed);
+  await deleteDoc(ref);
+};
+
+</script>
+
+</body>
+</html>
+
+
+

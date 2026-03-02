@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Orders</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<style>
+body {
+  margin: 0;
+  padding: 40px 6%;
+  background: #fff9f3;
+  font-family: Poppins, sans-serif;
+}
+
+h2 {
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 25px;
+  color: #c62828;
+}
+
+.order-box {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+.order-box p {
+  margin: 6px 0;
+  font-size: 15px;
+}
+
+.order-box b {
+  color: #c62828;
+}
+
+@media (min-width: 768px) {
+  body {
+    padding: 40px 20%;
+  }
+}
+</style>
+<body>
+
+<h2>My Orders</h2>
+
+<div id="ordersList"></div>
+
+<script type="module">
+import { initializeApp } 
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
+import { 
+  getFirestore, 
+  doc, 
+  getDoc 
+} 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+// FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
+  authDomain: "reddy-gari-biryani.firebaseapp.com",
+  projectId: "reddy-gari-biryani",
+  storageBucket: "reddy-gari-biryani.appspot.com",
+  messagingSenderId: "83117980930",
+  appId: "1:83117980930:web:5672bbedf6f8aafb88961b"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const ordersList = document.getElementById("ordersList");
+
+
+// LOAD ORDERS FROM LOCAL HISTORY
+window.addEventListener("DOMContentLoaded", loadOrders);
+
+async function loadOrders() {
+
+  const history = JSON.parse(localStorage.getItem("historyOrders")) || [];
+
+  if (history.length === 0) {
+    ordersList.innerHTML = "No past orders found on this device.";
+    return;
+  }
+
+  ordersList.innerHTML = "Loading...";
+
+  const results = [];
+
+  for (let id of history) {
+    // Check active orders
+    const activeSnap = await getDoc(doc(db, "orders", id));
+    if (activeSnap.exists()) {
+      results.push({ ...activeSnap.data(), id });
+      continue;
+    }
+
+    // Check history orders (delivered)
+    const histSnap = await getDoc(doc(db, "orders_history", id));
+    if (histSnap.exists()) {
+      results.push({ ...histSnap.data(), id });
+    }
+  }
+
+  if (results.length === 0) {
+    ordersList.innerHTML = "No orders found.";
+    return;
+  }
+
+  ordersList.innerHTML = results.map(o => `
+    <div class="order-box">
+      <p><b>Order ID:</b> ${o.orderId || o.id}</p>
+      <p><b>Total:</b> ₹${o.total}</p>
+      <p><b>Status:</b> ${o.status}</p>
+      <p><b>Date:</b> ${new Date(o.date).toLocaleString()}</p>
+    </div>
+  `).join("");
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Successful</title>
+</head>
+<style>
+body {
+  margin: 0;
+  padding: 40px 6%;
+  font-family: Poppins, sans-serif;
+  background: #fff9f3;
+  text-align: center;
+}
+
+.success-container {
+  max-width: 450px;
+  background: #fff;
+  margin: 40px auto;
+  padding: 35px;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+}
+
+.success-icon {
+  font-size: 60px;
+  background: #4caf50;
+  color: white;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  line-height: 80px;
+  margin: 0 auto 15px auto;
+}
+
+h2 {
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+#orderDetails {
+  background: #fff3e0;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 15px;
+  font-size: 16px;
+  text-align: left;
+}
+
+.track-btn,
+.home-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+.track-btn {
+  background: #c62828;
+  color: #fff;
+}
+
+.home-btn {
+  background: #f2f2f2;
+}
+</style>
+<body>
+
+<div class="success-container">
+    <div class="success-icon">✔</div>
+
+    <h2>Order Placed Successfully!</h2>
+
+    <p>Your order has been received.</p>
+
+    <div id="orderDetails"></div>
+
+    <button class="track-btn" onclick="trackOrder()">Track Order</button>
+    <button class="home-btn" onclick="goHome()">Back to Home</button>
+</div>
+
+<script>
+// Read order details stored during checkout
+const orderId = localStorage.getItem("orderId");
+const latestOrder = JSON.parse(localStorage.getItem("latestOrder"));
+
+const orderDetails = document.getElementById("orderDetails");
+
+if (latestOrder) {
+  orderDetails.innerHTML = `
+    <p><b>Order ID:</b> ${orderId}</p>
+    <p><b>Name:</b> ${latestOrder.name}</p>
+    <p><b>Total:</b> ${latestOrder.total}</p>
+  `;
+}
+
+function trackOrder() {
+  window.location.href = "order-track.html";
+}
+
+function goHome() {
+  window.location.href = "index.html"; // Change if your homepage is different
+}
+</script>
+</body>
+</html>
