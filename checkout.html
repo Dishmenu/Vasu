@@ -3,166 +3,83 @@
 <head>
   <title>Checkout</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin:0; padding:40px 6%; font-family:Poppins, sans-serif; background:#fff9f3; }
+    .checkout-page h2 { text-align:center; margin-bottom:25px; }
+    .checkout-container { display:flex; gap:25px; }
+    .order-summary, .checkout-form {
+      background:#fff; padding:20px; border-radius:16px;
+      box-shadow:0 4px 18px rgba(0,0,0,0.08);
+    }
+    .order-summary { width:40%; }
+    .checkout-form { width:60%; }
+    .summary-item { display:flex; justify-content:space-between; margin-bottom:8px; }
+    .summary-total { display:flex; justify-content:space-between; font-weight:700; margin-top:12px; }
+    input, textarea { width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; margin-bottom:10px; }
+    .payment-options { margin-top:15px; }
+    .pay-option { display:flex; align-items:center; padding:8px 0; }
+    .pay-icon { font-size:22px; margin-right:8px; }
+    button { width:100%; padding:14px; background:#c62828; color:#fff; border:none; border-radius:12px; margin-top:10px; }
+    @media(max-width:768px) { .checkout-container { flex-direction:column; } .order-summary, .checkout-form { width:100%; } }
+  </style>
 </head>
-
-<style>
-body {
-  margin: 0;
-  padding: 40px 6%;
-  font-family: Poppins, sans-serif;
-  background: #fff9f3;
-}
-
-.checkout-page h2 {
-  text-align: center;
-  margin-bottom: 25px;
-}
-
-.checkout-container {
-  display: flex;
-  gap: 25px;
-}
-
-/* -------------- SUMMARY BOX -------------- */
-.order-summary {
-  width: 40%;
-  background: #fff;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.08);
-}
-
-.order-summary h3 {
-  margin-bottom: 10px;
-}
-
-.summary-item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  font-size: 16px;
-}
-
-.summary-total {
-  display: flex;
-  justify-content: space-between;
-  font-size: 18px;
-  font-weight: 700;
-  margin-top: 12px;
-}
-
-/* -------------- CHECKOUT FORM -------------- */
-.checkout-form {
-  width: 60%;
-  background: #fff;
-  border-radius: 16px;
-  padding: 25px;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.08);
-}
-
-.checkout-form label {
-  display: block;
-  margin: 12px 0 6px;
-  font-size: 15px;
-}
-
-.checkout-form input,
-.checkout-form textarea {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  margin-bottom: 10px;
-  font-size: 15px;
-}
-
-.checkout-form button {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  background: #c62828;
-  border: none;
-  color: #fff;
-  border-radius: 12px;
-  margin-top: 10px;
-  cursor: pointer;
-}
-
-/* -------------- MOBILE -------------- */
-@media (max-width: 768px) {
-  .checkout-container {
-    flex-direction: column;
-  }
-
-  .order-summary {
-    width: 100%;
-    order: 1;
-  }
-
-  .checkout-form {
-    width: 100%;
-    order: 2;
-  }
-}
-</style>
 <body>
 
 <section class="checkout-page">
-
   <h2>Checkout</h2>
 
   <div class="checkout-container">
 
-    <!-- SUMMARY FIRST IN MOBILE -->
     <div class="order-summary">
       <h3>Your Order</h3>
       <div id="summaryItems"></div>
-
       <div class="summary-total">
         <p>Subtotal:</p>
         <p id="summaryTotal">₹0</p>
       </div>
     </div>
 
-    <!-- FORM -->
     <div class="checkout-form">
       <h3>Delivery Details</h3>
 
       <label>Full Name</label>
-      <input id="name" type="text">
+      <input id="name">
 
       <label>Phone</label>
-      <input id="phone" type="text">
+      <input id="phone">
 
       <label>Address</label>
       <textarea id="address"></textarea>
 
-      <button onclick="placeOrder()">Place Order</button>
+      <h3>Payment Method</h3>
+
+      <div class="payment-options">
+
+        <label class="pay-option">
+          <input type="radio" name="paymethod" value="cod" checked>
+          <span class="pay-icon">💵</span> Cash on Delivery
+        </label>
+
+        <label class="pay-option">
+          <input type="radio" name="paymethod" value="online">
+          <span class="pay-icon">💳</span> Online Payment
+        </label>
+
+      </div>
+
+      <button onclick="payAndPlaceOrder()">Pay & Place Order</button>
     </div>
 
   </div>
-
 </section>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script type="module">
 
-/* ----------------------------------------------------
-   FIREBASE IMPORTS
----------------------------------------------------- */
-import { initializeApp } 
-  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  serverTimestamp 
-} 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-
-/* ----------------------------------------------------
-   FIXED FIREBASE CONFIG (YOURS)
----------------------------------------------------- */
 const firebaseConfig = {
   apiKey: "AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
   authDomain: "reddy-gari-biryani.firebaseapp.com",
@@ -173,92 +90,94 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+const db = getFirestore(app);
 
-
-/* ----------------------------------------------------
-   LOAD CART (THE CORRECT KEY IS "cart")
----------------------------------------------------- */
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-const summaryItems = document.getElementById("summaryItems");
-const summaryTotal = document.getElementById("summaryTotal");
-
-
-/* ----------------------------------------------------
-   RENDER SUMMARY BOX
----------------------------------------------------- */
 function renderSummary() {
   let total = 0;
-  summaryItems.innerHTML = "";
+  let html = "";
 
-  cart.forEach(item => {
-    const itemTotal = item.qty * item.price;
-    total += itemTotal;
-
-    summaryItems.innerHTML += `
-      <div class="summary-item">
-        <span>${item.name} × ${item.qty}</span>
-        <span>₹${itemTotal}</span>
-      </div>
-    `;
+  cart.forEach(i => {
+    const t = i.qty * i.price;
+    total += t;
+    html += `<div class="summary-item"><span>${i.name} × ${i.qty}</span><span>₹${t}</span></div>`;
   });
 
-  summaryTotal.textContent = "₹" + total;
+  document.getElementById("summaryItems").innerHTML = html;
+  document.getElementById("summaryTotal").textContent = "₹" + total;
 }
-
 renderSummary();
 
+window.payAndPlaceOrder = async function () {
 
-/* ----------------------------------------------------
-   PLACE ORDER → SAVE TO FIRESTORE
-   THIS IS FULL VERSION: CLEAN + WORKING
----------------------------------------------------- */
-window.placeOrder = async function () {
+  const nameVal = document.getElementById("name").value.trim();
+  const phoneVal = document.getElementById("phone").value.trim();
+  const addressVal = document.getElementById("address").value.trim();
 
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const address = document.getElementById("address").value.trim();
-
-  if (!name || !phone || !address) {
-    alert("Please fill all fields");
+  if (!nameVal || !phoneVal || !addressVal) {
+    alert("Please fill all fields.");
     return;
   }
 
-  if (cart.length === 0) {
-    alert("Your cart is empty.");
+  const method = document.querySelector("input[name='paymethod']:checked").value;
+  const total = Number(document.getElementById("summaryTotal").textContent.replace("₹",""));
+  const orderId = Date.now().toString();
+
+  // COD
+  if (method === "cod") {
+    await setDoc(doc(db,"orders",orderId), {
+      name: nameVal,
+      phone: phoneVal,
+      address: addressVal,
+      items: cart,
+      total,
+      payMethod: "COD",
+      paymentStatus: "pending",
+      status: "pending",
+      timestamp: Date.now()
+    });
+
+    localStorage.setItem("lastOrderId", orderId);
+    localStorage.removeItem("cart");
+
+    window.location.href = "order-success.html";
     return;
   }
 
-  // Convert ₹500 string into number
-  const totalAmount = Number(summaryTotal.textContent.replace("₹", ""));
+  // RAZORPAY
+  var options = {
+    key: "rzp_test_SMgRiOxwLmh0lO",
+    amount: total * 100,
+    currency: "INR",
+    name: "Reddy Gari Biryani",
+    description: "Order Payment",
+    handler: async function (response) {
 
-  const order = {
-    name,
-    phone,
-    address,
-    items: cart,
-    total: totalAmount,
-    status: "pending",
-    timestamp: serverTimestamp()
+      await setDoc(doc(db,"orders",orderId), {
+        name: nameVal,
+        phone: phoneVal,
+        address: addressVal,
+        items: cart,
+        total,
+        payMethod:"Online",
+        paymentStatus:"paid",
+        razorpayPaymentId: response.razorpay_payment_id,
+        status:"accepted",
+        timestamp: Date.now()
+      });
+
+      localStorage.setItem("lastOrderId", orderId);
+      localStorage.removeItem("cart");
+
+      window.location.href = "order-success.html";
+    }
   };
 
-  // SAVE ORDER TO FIRESTORE
-  const ref = await addDoc(collection(db, "orders"), order);
-
-  // SAVE orderId locally for tracking
-  localStorage.setItem("orderId", ref.id);
-  // store order id locally for My Orders
-  let history = JSON.parse(localStorage.getItem("historyOrders")) || [];
-  history.push(ref.id);
-  localStorage.setItem("historyOrders", JSON.stringify(history));
-
-  // CLEAR CART
-  localStorage.removeItem("cart");
-
-  // REDIRECT TO SUCCESS PAGE
-  window.location.href = "order-success.html";
+  const rzp = new Razorpay(options);
+  rzp.open();
 };
+
 </script>
 </body>
 </html>

@@ -1,110 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Order Successful</title>
+
+  <style>
+    body { margin:0; padding:40px 6%; font-family:Poppins, sans-serif; background:#fff9f3; text-align:center; }
+    .success-container { max-width:460px; margin:30px auto; background:#fff; padding:35px; border-radius:18px; box-shadow:0 4px 18px rgba(0,0,0,0.08); }
+    .success-icon { width:80px;height:80px;border-radius:50%;background:#4caf50;color:#fff;font-size:55px;line-height:80px;margin:auto; }
+    #invoiceDetails { background:#fff3e0;padding:15px;border-radius:10px;margin:15px 0;text-align:left; font-size:16px; }
+    button { width:100%; padding:14px; border:none; border-radius:10px; font-size:16px; margin-top:10px; cursor:pointer; }
+    .track-btn { background:#c62828;color:#fff; }
+    .home-btn { background:#ddd; }
+    .wp-btn { background:#25D366;color:#fff; }
+  </style>
 </head>
-<style>
-body {
-  margin: 0;
-  padding: 40px 6%;
-  font-family: Poppins, sans-serif;
-  background: #fff9f3;
-  text-align: center;
-}
 
-.success-container {
-  max-width: 450px;
-  background: #fff;
-  margin: 40px auto;
-  padding: 35px;
-  border-radius: 18px;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.08);
-}
-
-.success-icon {
-  font-size: 60px;
-  background: #4caf50;
-  color: white;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  line-height: 80px;
-  margin: 0 auto 15px auto;
-}
-
-h2 {
-  margin-bottom: 8px;
-  font-weight: 700;
-}
-
-#orderDetails {
-  background: #fff3e0;
-  padding: 15px;
-  border-radius: 10px;
-  margin-top: 15px;
-  font-size: 16px;
-  text-align: left;
-}
-
-.track-btn,
-.home-btn {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 10px;
-  border: none;
-  margin-top: 15px;
-  cursor: pointer;
-}
-
-.track-btn {
-  background: #c62828;
-  color: #fff;
-}
-
-.home-btn {
-  background: #f2f2f2;
-}
-</style>
 <body>
 
 <div class="success-container">
     <div class="success-icon">✔</div>
-
     <h2>Order Placed Successfully!</h2>
-
     <p>Your order has been received.</p>
 
-    <div id="orderDetails"></div>
+    <!-- ORDER ID AND DETAILS SHOWN HERE -->
+    <div id="invoiceDetails">Loading...</div>
 
-    <button class="track-btn" onclick="trackOrder()">Track Order</button>
-    <button class="home-btn" onclick="goHome()">Back to Home</button>
+    <button class="track-btn" id="trackBtn">Track Order</button>
+    <button class="home-btn" onclick="window.location.href='index.html'">Back to Home</button>
+    <button class="wp-btn" id="wpBtn">Contact on WhatsApp</button>
 </div>
 
-<script>
-// Read order details stored during checkout
-const orderId = localStorage.getItem("orderId");
-const latestOrder = JSON.parse(localStorage.getItem("latestOrder"));
+<script type="module">
 
-const orderDetails = document.getElementById("orderDetails");
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, getDoc } 
+    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-if (latestOrder) {
-  orderDetails.innerHTML = `
+const app = initializeApp({
+  apiKey: "AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
+  authDomain: "reddy-gari-biryani.firebaseapp.com",
+  projectId: "reddy-gari-biryani",
+  storageBucket: "reddy-gari-biryani.appspot.com",
+  messagingSenderId: "83117980930",
+  appId: "1:83117980930:web:5672bbedf6f8aafb88961b"
+});
+
+const db = getFirestore(app);
+
+// LOAD orderId from localStorage
+const orderId = localStorage.getItem("lastOrderId");
+
+if (!orderId) {
+  invoiceDetails.innerHTML = "<p style='color:red;'>Order ID missing.</p>";
+  document.getElementById("trackBtn").style.display = "none";
+} else {
+  loadInvoice();
+  localStorage.removeItem("lastOrderId");
+}
+
+async function loadInvoice() {
+  const snap = await getDoc(doc(db, "orders", orderId));
+
+  if (!snap.exists()) {
+    invoiceDetails.innerHTML = "<p style='color:red;'>Order not found!</p>";
+    return;
+  }
+
+  const d = snap.data();
+
+  invoiceDetails.innerHTML = `
     <p><b>Order ID:</b> ${orderId}</p>
-    <p><b>Name:</b> ${latestOrder.name}</p>
-    <p><b>Total:</b> ${latestOrder.total}</p>
+    <p><b>Name:</b> ${d.name}</p>
+    <p><b>Phone:</b> ${d.phone}</p>
+    <p><b>Address:</b> ${d.address}</p>
+    <p><b>Payment:</b> ${d.payMethod}</p>
+    <p><b>Total:</b> ₹${d.total}</p>
+    <hr>
+    <b>Items:</b>
+    ${d.items.map(i => `<p>${i.name} × ${i.qty}</p>`).join("")}
   `;
+
+  document.getElementById("trackBtn").onclick = () => {
+    window.location.href = "order-track.html?orderId=" + orderId;
+  };
+
+  document.getElementById("wpBtn").onclick = () => {
+    let msg = `Order ID: ${orderId}\n\nItems:\n` +
+              d.items.map(i => `• ${i.name} × ${i.qty}`).join("\n");
+
+    window.open(`https://wa.me/919908500325?text=${encodeURIComponent(msg)}`);
+  };
 }
 
-function trackOrder() {
-  window.location.href = "order-track.html";
-}
-
-function goHome() {
-  window.location.href = "index.html"; // Change if your homepage is different
-}
 </script>
+
 </body>
 </html>
