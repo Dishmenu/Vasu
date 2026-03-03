@@ -79,8 +79,9 @@ button{
 <!-- LOGIN FORM -->
 <div id="loginBox">
   <h2>Admin Login</h2>
-  <input id="password" type="password" placeholder="Enter Admin Password">
-  <button onclick="loginAdmin()">Login</button>
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button id="loginBtn">Login</button>
   <p id="errorMsg" style="color:red;margin-top:10px;"></p>
 </div>
 
@@ -88,29 +89,27 @@ button{
 <div id="adminPanel">
   <div class="top-bar">
       <h2>New Orders</h2>
-      <button class="logout-btn" onclick="logout()">Logout</button>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
   </div>
 
   <div id="ordersList"></div>
 </div>
 
-
 <script type="module">
 
-/* ===================================================
-   FIREBASE IMPORTS
-=================================================== */
+/* FIREBASE IMPORTS */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { 
+  getAuth, signInWithEmailAndPassword, signOut,
+  onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
   getFirestore, collection, onSnapshot, doc,
   updateDoc, deleteDoc, getDoc, setDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-
-/* ===================================================
-   FIREBASE CONFIG
-=================================================== */
+/* FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
   authDomain: "reddy-gari-biryani.firebaseapp.com",
@@ -122,67 +121,62 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth();
 
-
-/* ===================================================
-   PAGE LOADING MODE
-=================================================== */
+/* UI Elements */
 const loginBox = document.getElementById("loginBox");
 const adminPanel = document.getElementById("adminPanel");
 const audio = document.getElementById("alertSound");
+const errorMsg = document.getElementById("errorMsg");
 
+/* LOGIN BUTTON */
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const pass = document.getElementById("password").value.trim();
 
-/* ===================================================
-   SHOW CORRECT VIEW
-=================================================== */
-function updateView() {
-  if (localStorage.getItem("adminAuth") === "LOGGED_IN") {
+  try {
+    const userCred = await signInWithEmailAndPassword(auth, email, pass);
+    const token = await userCred.user.getIdTokenResult();
+
+    if (token.claims.admin === true) {
+      loginBox.style.display = "none";
+      adminPanel.style.display = "block";
+      initializeAdmin();
+    } else {
+      errorMsg.textContent = "Not authorized!";
+    }
+
+  } catch (err) {
+    errorMsg.textContent = err.message;
+  }
+});
+
+/* LOGOUT */
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  signOut(auth);
+});
+
+/* CHECK AUTH STATE */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    loginBox.style.display = "block";
+    adminPanel.style.display = "none";
+    return;
+  }
+
+  const token = await user.getIdTokenResult();
+
+  if (token.claims.admin === true) {
     loginBox.style.display = "none";
     adminPanel.style.display = "block";
+    initializeAdmin();
   } else {
     loginBox.style.display = "block";
     adminPanel.style.display = "none";
   }
-}
+});
 
-updateView();
-
-
-/* ===================================================
-   LOGIN FUNCTION
-=================================================== */
-window.loginAdmin = function () {
-  const pass = document.getElementById("password").value.trim();
-  const correctPassword = "ReddyAdmin123";
-
-  if (pass === correctPassword) {
-
-    // unlock audio
-    audio.play().catch(()=>{});
-    audio.pause();
-    audio.currentTime = 0;
-
-    localStorage.setItem("adminAuth", "LOGGED_IN");
-    updateView();
-    initializeAdmin();
-  } else {
-    document.getElementById("errorMsg").innerText = "Incorrect password!";
-  }
-};
-
-
-/* ===================================================
-   LOGOUT FUNCTION
-=================================================== */
-window.logout = function () {
-  localStorage.removeItem("adminAuth");
-  updateView();
-};
-
-
-/* ===================================================
-   REALTIME ADMIN INITIALIZATION
-=================================================== */
+/* REALTIME ADMIN ORDER SYSTEM */
 let initialized = false;
 
 function initializeAdmin() {
@@ -198,7 +192,6 @@ function initializeAdmin() {
 
     const count = snapshot.size;
 
-    // Play alert for new orders
     if (!firstLoad && count > lastCount) {
       audio.currentTime = 0;
       audio.play();
@@ -240,26 +233,12 @@ function initializeAdmin() {
 
 }
 
-
-/* ===================================================
-   AUTO-INITIALIZE ADMIN IF LOGGED IN
-=================================================== */
-if (localStorage.getItem("adminAuth") === "LOGGED_IN") {
-  initializeAdmin();
-}
-
-
-/* ===================================================
-   STATUS UPDATE
-=================================================== */
+/* UPDATE STATUS */
 window.updateStatus = async function (id, status) {
   await updateDoc(doc(db, "orders", id), { status });
 };
 
-
-/* ===================================================
-   DELIVERED → COMPRESSED HISTORY
-=================================================== */
+/* DELIVERED → MOVE TO HISTORY */
 window.markDelivered = async function (id) {
 
   const ref = doc(db, "orders", id);
@@ -286,6 +265,3 @@ window.markDelivered = async function (id) {
 
 </body>
 </html>
-
-
-
