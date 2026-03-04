@@ -206,79 +206,161 @@ h2 {
 </section>
 
 <script>
+/* LOAD CART FROM STORAGE */
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
 const cartItemsDiv = document.getElementById("cartItems");
 const subtotalEl = document.getElementById("subtotal");
+const cartCount = document.getElementById("cartCount");
 
+/* INITIAL RENDER */
 renderCart();
+updateCartCount();
 
-/* RENDER CART ITEMS */
+
+/* -------------------------
+   RENDER CART ITEMS
+------------------------- */
 function renderCart() {
+
   cartItemsDiv.innerHTML = "";
+
   let subtotal = 0;
 
+  if (cart.length === 0) {
+    cartItemsDiv.innerHTML = "<p>Your cart is empty</p>";
+    subtotalEl.textContent = "₹0";
+    return;
+  }
+
   cart.forEach((item, index) => {
-    subtotal += item.price * item.qty;
+
+    const itemTotal = item.price * item.qty;
+
+    subtotal += itemTotal;
 
     cartItemsDiv.innerHTML += `
       <div class="cart-item">
-        
+
         <img src="${item.img}" alt="${item.name}">
-        
+
         <div class="cart-details">
           <h3>${item.name}</h3>
-          <p class="price">₹${item.price * item.qty}</p>
+
+          <p class="price">₹${itemTotal}</p>
 
           <div class="qty-row">
-            <button class="qty-btn minus" onclick="updateQty(${index}, -1)">-</button>
-            <input 
-              type="number" 
-              class="qty-input" 
-              min="1" 
-              value="${item.qty}" 
-              onchange="setQty(${index}, this.value)">
-            <button class="qty-btn plus" onclick="updateQty(${index}, 1)">+</button>
+
+            <button class="qty-btn minus"
+              onclick="updateQty(${index}, -1)">
+              -
+            </button>
+
+            <input
+              type="number"
+              class="qty-input"
+              min="1"
+              value="${item.qty}"
+              onchange="setQty(${index}, this.value)"
+            >
+
+            <button class="qty-btn plus"
+              onclick="updateQty(${index}, 1)">
+              +
+            </button>
+
           </div>
 
-          <button class="remove-btn" onclick="removeItem(${index})">
+          <button class="remove-btn"
+            onclick="removeItem(${index})">
             Remove
           </button>
+
         </div>
+
       </div>
     `;
+
   });
 
   subtotalEl.textContent = "₹" + subtotal;
+
 }
 
-/* UPDATE QTY + / – */
-function updateQty(i, change) {
-  cart[i].qty += change;
-  if (cart[i].qty < 1) cart[i].qty = 1;
+
+/* -------------------------
+   UPDATE QUANTITY + / -
+------------------------- */
+function updateQty(index, change) {
+
+  cart[index].qty += change;
+
+  if (cart[index].qty < 1) {
+    cart[index].qty = 1;
+  }
+
   saveCart();
   renderCart();
 }
 
-/* MANUAL NUMBER INPUT */
-function setQty(i, val) {
-  val = parseInt(val);
-  if (val < 1 || isNaN(val)) val = 1;
-  cart[i].qty = val;
+
+/* -------------------------
+   MANUAL QUANTITY INPUT
+------------------------- */
+function setQty(index, value) {
+
+  let qty = parseInt(value);
+
+  if (isNaN(qty) || qty < 1) {
+    qty = 1;
+  }
+
+  cart[index].qty = qty;
+
   saveCart();
   renderCart();
 }
 
-/* REMOVE ITEM */
-function removeItem(i) {
-  cart.splice(i, 1);
+
+/* -------------------------
+   REMOVE ITEM
+------------------------- */
+function removeItem(index) {
+
+  cart.splice(index, 1);
+
   saveCart();
   renderCart();
 }
 
-/* SAVE CART */
+
+/* -------------------------
+   SAVE CART
+------------------------- */
 function saveCart() {
+
   localStorage.setItem("cart", JSON.stringify(cart));
+
+  updateCartCount();
+
+}
+
+
+/* -------------------------
+   UPDATE CART COUNT
+------------------------- */
+function updateCartCount() {
+
+  if (!cartCount) return;
+
+  let totalItems = 0;
+
+  cart.forEach(item => {
+    totalItems += item.qty;
+  });
+
+  cartCount.textContent = totalItems;
+
 }
 </script>
 </body>

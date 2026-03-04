@@ -284,13 +284,13 @@
     <!-- 10 PRODUCTS -->
 
     <!-- 1 -->
-    <div class="menu-card" data-category="biryani" data-price="180">
+    <div class="menu-card" data-category="biryani" data-price="20">
       <img class="menu-img" src="assets/menu/chicken-dum.jpg" alt="">
       <div class="menu-info">
         <h3>Chicken Dum Biryani</h3>
         <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
         <div class="row-info">
-          <p class="price">₹10</p>
+          <p class="price">₹20</p>
           <div class="qty-row">
             <button class="qty-btn minus">-</button>
             <input type="number" class="qty-input" value="1" min="1">
@@ -301,13 +301,13 @@
       </div>
     </div>
     <!-- 2 -->
-    <div class="menu-card" data-category="Starters" data-price="180">
+    <div class="menu-card" data-category="Starters" data-price="40">
       <img class="menu-img" src="assets/menu/chicken-dum.jpg" alt="">
       <div class="menu-info">
         <h3>Chicken Dum Biryani</h3>
         <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
         <div class="row-info">
-          <p class="price">₹20</p>
+          <p class="price">₹40</p>
           <div class="qty-row">
             <button class="qty-btn minus">-</button>
             <input type="number" class="qty-input" value="1" min="1">
@@ -319,13 +319,13 @@
     </div>
 
     <!-- 3 -->
-    <div class="menu-card" data-category="biryani" data-price="180">
+    <div class="menu-card" data-category="biryani" data-price="40">
       <img class="menu-img" src="assets/menu/chicken-dum.jpg" alt="">
       <div class="menu-info">
         <h3>Chicken Dum Biryani</h3>
         <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
         <div class="row-info">
-          <p class="price">₹20</p>
+          <p class="price">₹40</p>
           <div class="qty-row">
             <button class="qty-btn minus">-</button>
             <input type="number" class="qty-input" value="1" min="1">
@@ -343,7 +343,7 @@
         <h3>Chicken Dum Biryani</h3>
         <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
         <div class="row-info">
-          <p class="price">₹25</p>
+          <p class="price">₹180</p>
           <div class="qty-row">
             <button class="qty-btn minus">-</button>
             <input type="number" class="qty-input" value="1" min="1">
@@ -355,13 +355,13 @@
     </div>
 
     <!-- 5 -->
-    <div class="menu-card" data-category="biryani" data-price="180">
+    <div class="menu-card" data-category="biryani" data-price="20">
       <img class="menu-img" src="assets/menu/chicken-dum.jpg" alt="">
       <div class="menu-info">
         <h3>Chicken Dum Biryani</h3>
         <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
         <div class="row-info">
-          <p class="price">₹18</p>
+          <p class="price">₹20</p>
           <div class="qty-row">
             <button class="qty-btn minus">-</button>
             <input type="number" class="qty-input" value="1" min="1">
@@ -379,7 +379,7 @@
         <h3>Chicken Dum Biryani</h3>
         <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
         <div class="row-info">
-          <p class="price">₹18</p>
+          <p class="price">₹10</p>
           <div class="qty-row">
             <button class="qty-btn minus">-</button>
             <input type="number" class="qty-input" value="1" min="1">
@@ -392,13 +392,13 @@
 
 
     <!-- 7 -->
-    <div class="menu-card" data-category="biryani" data-price="180">
+    <div class="menu-card" data-category="biryani" data-price="80">
       <img class="menu-img" src="assets/menu/chicken-dum.jpg" alt="">
       <div class="menu-info">
         <h3>Chicken Dum Biryani</h3>
         <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
         <div class="row-info">
-          <p class="price">₹18</p>
+          <p class="price">₹80</p>
           <div class="qty-row">
             <button class="qty-btn minus">-</button>
             <input type="number" class="qty-input" value="1" min="1">
@@ -416,7 +416,7 @@
         <h3>Chicken Dum Biryani</h3>
         <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
         <div class="row-info">
-          <p class="price">₹10</p>
+          <p class="price">₹180</p>
           <div class="qty-row">
             <button class="qty-btn minus">-</button>
             <input type="number" class="qty-input" value="1" min="1">
@@ -434,7 +434,7 @@
         <h3>Chicken Dum Biryani</h3>
         <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
         <div class="row-info">
-          <p class="price">₹20</p>
+          <p class="price">₹180</p>
           <div class="qty-row">
             <button class="qty-btn minus">-</button>
             <input type="number" class="qty-input" value="1" min="1">
@@ -451,7 +451,7 @@
         <h3>Chicken Dum Biryani</h3>
         <p class="short-desc">Spicy Andhra style, cooked fresh daily.</p>
         <div class="row-info">
-          <p class="price">₹30</p>
+          <p class="price">₹180</p>
           <div class="qty-row">
             <button class="qty-btn minus">-</button>
             <input type="number" class="qty-input" value="1" min="1">
@@ -508,46 +508,66 @@ function showToast(message) {
   }, 1700);
 }
 /* QTY + / - BEHAVIOUR */
-document.querySelectorAll('.menu-card').forEach(card => {
+document.querySelectorAll(".menu-card").forEach(card => {
 
   const basePrice = parseInt(card.dataset.price);
-  const priceEl = card.querySelector('.price');
-  const qtyInput = card.querySelector('.qty-input');
-  const plus = card.querySelector('.plus');
-  const minus = card.querySelector('.minus');
+  const priceEl = card.querySelector(".price");
+  const qtyInput = card.querySelector(".qty-input");
+  const plus = card.querySelector(".plus");
+  const minus = card.querySelector(".minus");
 
   function updatePrice() {
     let qty = parseInt(qtyInput.value);
-    if (qty < 1) qty = 1;
+    if (isNaN(qty) || qty < 1) qty = 1;
+
     priceEl.textContent = "₹" + (qty * basePrice);
   }
 
-  plus.addEventListener('click', () => {
+  plus.addEventListener("click", () => {
     qtyInput.value = parseInt(qtyInput.value) + 1;
     updatePrice();
   });
 
-  minus.addEventListener('click', () => {
-    if (qtyInput.value > 1) {
-      qtyInput.value = parseInt(qtyInput.value) - 1;
+  minus.addEventListener("click", () => {
+    let q = parseInt(qtyInput.value);
+    if (q > 1) {
+      qtyInput.value = q - 1;
+      updatePrice();
     }
-    updatePrice();
   });
 
-  qtyInput.addEventListener('input', updatePrice);
+  qtyInput.addEventListener("input", updatePrice);
 });
+
+
+/* ADD TO CART */
 document.querySelectorAll(".menu-card").forEach(card => {
-  
+
   const addBtn = card.querySelector(".addcart-btn");
 
   addBtn.addEventListener("click", () => {
+
     const name = card.querySelector("h3").textContent;
     const img = card.querySelector(".menu-img").src;
     const price = parseInt(card.dataset.price);
     const qty = parseInt(card.querySelector(".qty-input").value);
 
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    cart.push({ name, img, price, qty });
+
+    /* CHECK IF ITEM ALREADY EXISTS */
+    let existingItem = cart.find(item => item.name === name);
+
+    if (existingItem) {
+      existingItem.qty += qty;
+    } else {
+      cart.push({
+        name: name,
+        img: img,
+        price: price,
+        qty: qty
+      });
+    }
+
     localStorage.setItem("cart", JSON.stringify(cart));
 
     updateCartCount();
@@ -556,14 +576,24 @@ document.querySelectorAll(".menu-card").forEach(card => {
   });
 
 });
+
+
+/* CART COUNT */
 function updateCartCount() {
+
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
-  document.getElementById("cartCount").textContent = cart.length;
+
+  let totalItems = 0;
+
+  cart.forEach(item => {
+    totalItems += item.qty;
+  });
+
+  const countEl = document.getElementById("cartCount");
+  if (countEl) countEl.textContent = totalItems;
 }
 
 updateCartCount();
 </script>
 </body>
-
 </html>
-
