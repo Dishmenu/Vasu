@@ -1,264 +1,504 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
 
 <style>
+
 body{
-  font-family: Poppins, sans-serif;
-  background:#fff9f3;
-  padding:20px;
+font-family:Poppins,sans-serif;
+background:#fff9f3;
+padding:20px;
 }
 
-/* LOGIN BOX */
-#loginBox {
-  max-width:350px;
-  margin:80px auto;
-  background:white;
-  padding:25px;
-  border-radius:14px;
-  box-shadow:0 4px 14px rgba(0,0,0,0.1);
-  display:none;
+#loginBox{
+max-width:350px;
+margin:80px auto;
+background:white;
+padding:25px;
+border-radius:14px;
+box-shadow:0 4px 14px rgba(0,0,0,0.1);
 }
 
-#loginBox input {
-  width:100%;
-  padding:14px;
-  margin-top:15px;
-  border-radius:10px;
-  border:1px solid #ccc;
+#loginBox input{
+width:100%;
+padding:12px;
+margin-top:10px;
 }
 
-#loginBox button {
-  width:100%;
-  padding:14px;
-  margin-top:20px;
-  background:#c62828;
-  color:white;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
+#adminPanel{
+display:none;
 }
 
-/* DASHBOARD */
-#adminPanel { display:none; }
-
-.logout-btn{
-  background:#c62828;
-  color:white;
-  border:none;
-  padding:10px 16px;
-  border-radius:8px;
-  float:right;
-}
-
-.order-box{
-  background:white;
-  padding:18px;
-  margin-bottom:12px;
-  border-radius:12px;
-  box-shadow:0 3px 8px rgba(0,0,0,0.1);
+.order-box, .menu-box{
+background:white;
+padding:16px;
+margin:10px 0;
+border-radius:10px;
+box-shadow:0 3px 8px rgba(0,0,0,0.1);
 }
 
 button{
-  margin:4px;
-  padding:8px 12px;
-  border:none;
-  background:#c62828;
-  color:white;
-  border-radius:6px;
+padding:8px 12px;
+background:#c62828;
+color:white;
+border:none;
+border-radius:6px;
+margin:3px;
 }
-</style>
 
+input{
+padding:8px;
+margin:3px;
+}
+
+</style>
 </head>
+
 <body>
 
-<audio id="alertSound" src="alert.mp3" preload="auto"></audio>
-
-<!-- LOGIN FORM -->
+<!-- LOGIN -->
 <div id="loginBox">
-  <h2>Admin Login</h2>
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <button id="loginBtn">Login</button>
-  <p id="errorMsg" style="color:red;margin-top:10px;"></p>
+<h2>Admin Login</h2>
+
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+
+<button id="loginBtn">Login</button>
 </div>
 
 <!-- ADMIN PANEL -->
 <div id="adminPanel">
-  <div class="top-bar">
-      <h2>New Orders</h2>
-      <button class="logout-btn" id="logoutBtn">Logout</button>
-  </div>
 
-  <div id="ordersList"></div>
+<h2>Orders</h2>
+<button id="logoutBtn">Logout</button>
+
+<div id="ordersList"></div>
+
+<h2 style="margin-top:40px;">Menu Manager</h2>
+
+<div>
+
+<input id="itemName" placeholder="Item Name">
+<input id="itemPrice" placeholder="Price">
+<input id="itemCategory" placeholder="Category">
+
+<input type="file" id="itemImage" accept="image/*">
+
+<button onclick="addMenuItem()">Add Item</button>
+
 </div>
+
+<div id="menuList"></div>
+
+</div>
+
 
 <script type="module">
 
-/* FIREBASE IMPORTS */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { 
-  getAuth, signInWithEmailAndPassword, signOut,
-  onAuthStateChanged 
+
+import {
+getAuth,
+signInWithEmailAndPassword,
+signOut,
+onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
-  getFirestore, collection, onSnapshot, doc,
-  updateDoc, deleteDoc, getDoc, setDoc
+getFirestore,
+collection,
+onSnapshot,
+doc,
+updateDoc,
+deleteDoc,
+getDoc,
+setDoc,
+addDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* FIREBASE CONFIG */
+import {
+getStorage,
+ref,
+uploadBytes,
+getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+
 const firebaseConfig = {
   apiKey: "AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
   authDomain: "reddy-gari-biryani.firebaseapp.com",
   projectId: "reddy-gari-biryani",
-  storageBucket: "reddy-gari-biryani.appspot.com",
+  storageBucket: "reddy-gari-biryani.firebasestorage.app",
   messagingSenderId: "83117980930",
   appId: "1:83117980930:web:5672bbedf6f8aafb88961b"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth();
+const db=getFirestore(app);
+const auth=getAuth(app);
+const storage=getStorage(app);
 
-/* UI Elements */
-const loginBox = document.getElementById("loginBox");
-const adminPanel = document.getElementById("adminPanel");
-const audio = document.getElementById("alertSound");
-const errorMsg = document.getElementById("errorMsg");
 
-/* LOGIN BUTTON */
-document.getElementById("loginBtn").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const pass = document.getElementById("password").value.trim();
+const loginBox=document.getElementById("loginBox");
+const adminPanel=document.getElementById("adminPanel");
 
-  try {
-    const userCred = await signInWithEmailAndPassword(auth, email, pass);
-    const token = await userCred.user.getIdTokenResult();
+const ordersList=document.getElementById("ordersList");
+const menuList=document.getElementById("menuList");
 
-    if (token.claims.admin === true) {
-      loginBox.style.display = "none";
-      adminPanel.style.display = "block";
-      initializeAdmin();
-    } else {
-      errorMsg.textContent = "Not authorized!";
-    }
 
-  } catch (err) {
-    errorMsg.textContent = err.message;
-  }
-});
 
-/* LOGOUT */
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  signOut(auth);
-});
+/* LOGIN */
 
-/* CHECK AUTH STATE */
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    loginBox.style.display = "block";
-    adminPanel.style.display = "none";
-    return;
-  }
+document.getElementById("loginBtn").onclick=async()=>{
 
-  const token = await user.getIdTokenResult();
+const email=document.getElementById("email").value.trim();
+const pass=document.getElementById("password").value.trim();
 
-  if (token.claims.admin === true) {
-    loginBox.style.display = "none";
-    adminPanel.style.display = "block";
-    initializeAdmin();
-  } else {
-    loginBox.style.display = "block";
-    adminPanel.style.display = "none";
-  }
-});
+try{
 
-/* REALTIME ADMIN ORDER SYSTEM */
-let initialized = false;
+const user=await signInWithEmailAndPassword(auth,email,pass);
 
-function initializeAdmin() {
-  if (initialized) return;
-  initialized = true;
+const token=await user.user.getIdTokenResult();
 
-  const ordersList = document.getElementById("ordersList");
+if(token.claims.admin){
 
-  let firstLoad = true;
-  let lastCount = 0;
+loginBox.style.display="none";
+adminPanel.style.display="block";
 
-  onSnapshot(collection(db, "orders"), (snapshot) => {
+loadOrders();
+loadMenu();
 
-    const count = snapshot.size;
+}else{
 
-    if (!firstLoad && count > lastCount) {
-      audio.currentTime = 0;
-      audio.play();
-    }
-
-    firstLoad = false;
-    lastCount = count;
-
-    ordersList.innerHTML = "";
-
-    snapshot.docs.forEach(docSnap => {
-      const data = docSnap.data();
-
-      ordersList.innerHTML += `
-        <div class="order-box">
-          <h3>Order ID: ${docSnap.id}</h3>
-
-          <p><b>Name:</b> ${data.name}</p>
-          <p><b>Phone:</b> ${data.phone}</p>
-          <p><b>Address:</b> ${data.address}</p>
-
-          <b>Items:</b>
-          <ul>
-            ${data.items.map(i => `<li>${i.name} × ${i.qty}</li>`).join("")}
-          </ul>
-
-          <p><b>Total:</b> ₹${data.total}</p>
-          <p><b>Status:</b> ${data.status}</p>
-
-          <button onclick="updateStatus('${docSnap.id}','accepted')">Accept</button>
-          <button onclick="updateStatus('${docSnap.id}','preparing')">Preparing</button>
-          <button onclick="updateStatus('${docSnap.id}','out_for_delivery')">Out For Delivery</button>
-          <button onclick="markDelivered('${docSnap.id}')">Delivered</button>
-        </div>
-      `;
-    });
-
-  });
+alert("Not admin");
 
 }
 
-/* UPDATE STATUS */
-window.updateStatus = async function (id, status) {
-  await updateDoc(doc(db, "orders", id), { status });
+}catch(err){
+
+alert(err.message);
+
+}
+
 };
 
-/* DELIVERED → MOVE TO HISTORY */
-window.markDelivered = async function (id) {
 
-  const ref = doc(db, "orders", id);
-  const snap = await getDoc(ref);
+/* LOGOUT */
 
-  if (!snap.exists()) return;
+document.getElementById("logoutBtn").onclick=()=>{
 
-  const o = snap.data();
+signOut(auth);
 
-  const compressed = {
-    orderId: id,
-    name: o.name,
-    phone: o.phone,
-    total: o.total,
-    date: Date.now(),
-    status: "delivered"
-  };
+};
 
-  await setDoc(doc(db, "orders_history", id), compressed);
-  await deleteDoc(ref);
+
+/* AUTH CHECK */
+
+onAuthStateChanged(auth,async(user)=>{
+
+if(!user){
+
+loginBox.style.display="block";
+adminPanel.style.display="none";
+return;
+
+}
+
+const token=await user.getIdTokenResult();
+
+if(token.claims.admin){
+
+loginBox.style.display="none";
+adminPanel.style.display="block";
+
+loadOrders();
+loadMenu();
+
+}
+
+});
+
+
+
+/* LOAD ORDERS */
+
+function loadOrders(){
+
+onSnapshot(collection(db,"orders"),snapshot=>{
+
+ordersList.innerHTML="";
+
+snapshot.forEach(docSnap=>{
+
+const o=docSnap.data();
+
+ordersList.innerHTML+=`
+
+<div class="order-box">
+
+<h3>Order ${docSnap.id}</h3>
+
+<p>${o.name}</p>
+<p>${o.phone}</p>
+<p>${o.address}</p>
+
+<ul>
+${o.items.map(i=>`<li>${i.name} x ${i.qty}</li>`).join("")}
+</ul>
+
+<p>Total ₹${o.total}</p>
+
+<button onclick="updateStatus('${docSnap.id}','accepted')">Accept</button>
+<button onclick="updateStatus('${docSnap.id}','preparing')">Preparing</button>
+<button onclick="updateStatus('${docSnap.id}','out_for_delivery')">Out</button>
+<button onclick="markDelivered('${docSnap.id}')">Delivered</button>
+
+</div>
+
+`;
+
+});
+
+});
+
+}
+
+
+
+/* UPDATE ORDER STATUS */
+
+window.updateStatus=async(id,status)=>{
+
+await updateDoc(doc(db,"orders",id),{status});
+
+};
+
+
+
+/* MOVE TO HISTORY */
+
+window.markDelivered=async(id)=>{
+
+const ref=doc(db,"orders",id);
+const snap=await getDoc(ref);
+
+if(!snap.exists()) return;
+
+const o=snap.data();
+
+await setDoc(doc(db,"orders_history",id),{
+
+name:o.name,
+phone:o.phone,
+total:o.total,
+date:Date.now(),
+status:"delivered"
+
+});
+
+await deleteDoc(ref);
+
+};
+
+
+
+/* IMAGE COMPRESSION */
+
+async function compressImage(file){
+
+return new Promise(resolve=>{
+
+const img=new Image();
+const reader=new FileReader();
+
+reader.onload=e=>img.src=e.target.result;
+
+img.onload=()=>{
+
+const canvas=document.createElement("canvas");
+const ctx=canvas.getContext("2d");
+
+const max=600;
+
+let w=img.width;
+let h=img.height;
+
+if(w>h){
+
+if(w>max){
+
+h*=max/w;
+w=max;
+
+}
+
+}else{
+
+if(h>max){
+
+w*=max/h;
+h=max;
+
+}
+
+}
+
+canvas.width=w;
+canvas.height=h;
+
+ctx.drawImage(img,0,0,w,h);
+
+canvas.toBlob(blob=>{
+
+resolve(blob);
+
+},"image/webp",0.7);
+
+};
+
+reader.readAsDataURL(file);
+
+});
+
+}
+
+
+
+/* ADD MENU ITEM */
+
+window.addMenuItem=async()=>{
+
+const name=document.getElementById("itemName").value;
+const price=Number(document.getElementById("itemPrice").value);
+const category=document.getElementById("itemCategory").value;
+
+const file=document.getElementById("itemImage").files[0];
+
+if(!file){
+
+alert("Select image");
+
+return;
+
+}
+
+const compressed=await compressImage(file);
+
+const imageRef=ref(storage,"menu/"+Date.now()+".webp");
+
+await uploadBytes(imageRef,compressed);
+
+const imageUrl=await getDownloadURL(imageRef);
+
+await addDoc(collection(db,"menu"),{
+
+name,
+price,
+category,
+image:imageUrl,
+available:true
+
+});
+
+};
+
+
+
+/* LOAD MENU */
+
+function loadMenu(){
+
+onSnapshot(collection(db,"menu"),snap=>{
+
+menuList.innerHTML="";
+
+snap.forEach(docSnap=>{
+
+const m=docSnap.data();
+
+menuList.innerHTML+=`
+
+<div class="menu-box">
+
+<b>${m.name}</b>
+
+<br>
+
+₹${m.price}
+
+<br>
+
+Status: ${m.available?"Available":"Disabled"}
+
+<br>
+
+<button onclick="toggleMenu('${docSnap.id}',${m.available})">
+${m.available?"Disable":"Enable"}
+</button>
+
+<button onclick="editPrice('${docSnap.id}')">
+Edit Price
+</button>
+
+<button onclick="deleteMenu('${docSnap.id}')">
+Delete
+</button>
+
+</div>
+
+`;
+
+});
+
+});
+
+}
+
+
+
+/* ENABLE / DISABLE ITEM */
+
+window.toggleMenu=async(id,current)=>{
+
+await updateDoc(doc(db,"menu",id),{
+
+available:!current
+
+});
+
+};
+
+
+
+/* EDIT PRICE */
+
+window.editPrice=async(id)=>{
+
+const price=prompt("Enter new price");
+
+if(!price) return;
+
+await updateDoc(doc(db,"menu",id),{
+
+price:Number(price)
+
+});
+
+};
+
+
+
+/* DELETE ITEM */
+
+window.deleteMenu=async(id)=>{
+
+if(!confirm("Delete item?")) return;
+
+await deleteDoc(doc(db,"menu",id));
+
 };
 
 </script>
