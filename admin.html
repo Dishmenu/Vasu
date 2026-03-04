@@ -1,94 +1,99 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel</title>
+
+<meta charset="UTF-8">
+<title>Reddy Gari Biryani Admin</title>
 
 <style>
 
 body{
-font-family:Poppins,sans-serif;
-background:#fff9f3;
+font-family:Arial;
+background:#f2f2f2;
 padding:20px;
 }
 
-#loginBox{
-max-width:350px;
-margin:80px auto;
+#loginBox,#adminPanel{
 background:white;
-padding:25px;
-border-radius:14px;
-box-shadow:0 4px 14px rgba(0,0,0,0.1);
+padding:20px;
+max-width:600px;
+margin:auto;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
-#loginBox input{
+input,select{
 width:100%;
-padding:12px;
+padding:10px;
 margin-top:10px;
 }
 
-#adminPanel{
-display:none;
-}
-
-.order-box, .menu-box{
-background:white;
-padding:16px;
-margin:10px 0;
-border-radius:10px;
-box-shadow:0 3px 8px rgba(0,0,0,0.1);
-}
-
 button{
-padding:8px 12px;
-background:#c62828;
-color:white;
-border:none;
-border-radius:6px;
-margin:3px;
+margin-top:10px;
+padding:10px;
+cursor:pointer;
 }
 
-input{
-padding:8px;
-margin:3px;
+.menu-item{
+display:flex;
+align-items:center;
+justify-content:space-between;
+border-bottom:1px solid #ddd;
+padding:10px;
+}
+
+.menu-item img{
+width:60px;
+height:60px;
+object-fit:cover;
+border-radius:6px;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <div id="loginBox">
+
 <h2>Admin Login</h2>
 
-<input id="email" placeholder="Email">
+<input id="email" placeholder="Admin Email">
+
 <input id="password" type="password" placeholder="Password">
 
-<button id="loginBtn">Login</button>
-</div>
-
-<!-- ADMIN PANEL -->
-<div id="adminPanel">
-
-<h2>Orders</h2>
-<button id="logoutBtn">Logout</button>
-
-<div id="ordersList"></div>
-
-<h2 style="margin-top:40px;">Menu Manager</h2>
-
-<div>
-
-<input id="itemName" placeholder="Item Name">
-<input id="itemPrice" placeholder="Price">
-<input id="itemCategory" placeholder="Category">
-
-<input type="file" id="itemImage" accept="image/*">
-
-<button onclick="addMenuItem()">Add Item</button>
+<button onclick="login()">Login</button>
 
 </div>
+
+
+<div id="adminPanel" style="display:none">
+
+<h2>Menu Manager</h2>
+
+<button onclick="logout()">Logout</button>
+
+<h3>Add Menu Item</h3>
+
+<input id="name" placeholder="Item name">
+
+<input id="price" type="number" placeholder="Price">
+
+<select id="category">
+
+<option>Biryani</option>
+<option>Rice</option>
+<option>Starters</option>
+<option>Drinks</option>
+
+</select>
+
+<input type="file" id="image">
+
+<button onclick="addItem()">Add Item</button>
+
+<h3>Menu Items</h3>
 
 <div id="menuList"></div>
 
@@ -102,20 +107,18 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import {
 getAuth,
 signInWithEmailAndPassword,
-signOut,
-onAuthStateChanged
+onAuthStateChanged,
+signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
 getFirestore,
 collection,
-onSnapshot,
-doc,
-updateDoc,
+addDoc,
+getDocs,
 deleteDoc,
-getDoc,
-setDoc,
-addDoc
+doc,
+updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import {
@@ -130,376 +133,167 @@ const firebaseConfig = {
   apiKey: "AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
   authDomain: "reddy-gari-biryani.firebaseapp.com",
   projectId: "reddy-gari-biryani",
-  storageBucket: "reddy-gari-biryani.appspot.com",
+  storageBucket: "reddy-gari-biryani.firebasestorage.app",
   messagingSenderId: "83117980930",
   appId: "1:83117980930:web:5672bbedf6f8aafb88961b"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db=getFirestore(app);
-const auth=getAuth(app);
-const storage=getStorage(app);
+const auth = getAuth(app);
+
+const db = getFirestore(app);
+
+const storage = getStorage(app);
 
 
-const loginBox=document.getElementById("loginBox");
-const adminPanel=document.getElementById("adminPanel");
+window.login = async ()=>{
 
-const ordersList=document.getElementById("ordersList");
-const menuList=document.getElementById("menuList");
+await signInWithEmailAndPassword(
+auth,
+email.value,
+password.value
+);
+
+}
 
 
+window.logout = async ()=>{
 
-/* LOGIN */
+await signOut(auth);
 
-document.getElementById("loginBtn").onclick=async()=>{
+}
 
-const email=document.getElementById("email").value.trim();
-const pass=document.getElementById("password").value.trim();
 
-try{
+onAuthStateChanged(auth,user=>{
 
-const user=await signInWithEmailAndPassword(auth,email,pass);
-
-const token=await user.user.getIdTokenResult();
-
-if(token.claims.admin){
+if(user){
 
 loginBox.style.display="none";
 adminPanel.style.display="block";
 
-loadOrders();
 loadMenu();
 
 }else{
-
-alert("Not admin");
-
-}
-
-}catch(err){
-
-alert(err.message);
-
-}
-
-};
-
-
-/* LOGOUT */
-
-document.getElementById("logoutBtn").onclick=()=>{
-
-signOut(auth);
-
-};
-
-
-/* AUTH CHECK */
-
-onAuthStateChanged(auth,async(user)=>{
-
-if(!user){
 
 loginBox.style.display="block";
 adminPanel.style.display="none";
+
+}
+
+})
+
+
+window.addItem = async ()=>{
+
+const file = image.files[0];
+
+if(!file){
+
+alert("Upload image");
 return;
 
 }
 
-const token=await user.getIdTokenResult();
+if(file.size > 2 * 1024 * 1024){
 
-if(token.claims.admin){
+alert("Image must be under 2MB");
+return;
 
-loginBox.style.display="none";
-adminPanel.style.display="block";
+}
 
-loadOrders();
+const imageRef = ref(storage,"menu/"+Date.now()+".webp");
+
+await uploadBytes(imageRef,file);
+
+const url = await getDownloadURL(imageRef);
+
+await addDoc(collection(db,"menu"),{
+
+name:name.value,
+price:Number(price.value),
+category:category.value,
+image:url,
+available:true,
+timestamp:Date.now()
+
+});
+
+name.value="";
+price.value="";
+image.value="";
+
 loadMenu();
 
 }
 
-});
 
+async function loadMenu(){
 
-
-/* LOAD ORDERS */
-
-function loadOrders(){
-
-onSnapshot(collection(db,"orders"),snapshot=>{
-
-ordersList.innerHTML="";
-
-snapshot.forEach(docSnap=>{
-
-const o=docSnap.data();
-
-ordersList.innerHTML+=`
-
-<div class="order-box">
-
-<h3>Order ${docSnap.id}</h3>
-
-<p>${o.name}</p>
-<p>${o.phone}</p>
-<p>${o.address}</p>
-
-<ul>
-${o.items.map(i=>`<li>${i.name} x ${i.qty}</li>`).join("")}
-</ul>
-
-<p>Total ₹${o.total}</p>
-
-<button onclick="updateStatus('${docSnap.id}','accepted')">Accept</button>
-<button onclick="updateStatus('${docSnap.id}','preparing')">Preparing</button>
-<button onclick="updateStatus('${docSnap.id}','out_for_delivery')">Out</button>
-<button onclick="markDelivered('${docSnap.id}')">Delivered</button>
-
-</div>
-
-`;
-
-});
-
-});
-
-}
-
-
-
-/* UPDATE ORDER STATUS */
-
-window.updateStatus=async(id,status)=>{
-
-await updateDoc(doc(db,"orders",id),{status});
-
-};
-
-
-
-/* MOVE TO HISTORY */
-
-window.markDelivered=async(id)=>{
-
-const ref=doc(db,"orders",id);
-const snap=await getDoc(ref);
-
-if(!snap.exists()) return;
-
-const o=snap.data();
-
-await setDoc(doc(db,"orders_history",id),{
-
-name:o.name,
-phone:o.phone,
-total:o.total,
-date:Date.now(),
-status:"delivered"
-
-});
-
-await deleteDoc(ref);
-
-};
-
-
-
-/* IMAGE COMPRESSION */
-
-async function compressImage(file){
-
-return new Promise(resolve=>{
-
-const img=new Image();
-const reader=new FileReader();
-
-reader.onload=e=>img.src=e.target.result;
-
-img.onload=()=>{
-
-const canvas=document.createElement("canvas");
-const ctx=canvas.getContext("2d");
-
-const max=600;
-
-let w=img.width;
-let h=img.height;
-
-if(w>h){
-
-if(w>max){
-
-h*=max/w;
-w=max;
-
-}
-
-}else{
-
-if(h>max){
-
-w*=max/h;
-h=max;
-
-}
-
-}
-
-canvas.width=w;
-canvas.height=h;
-
-ctx.drawImage(img,0,0,w,h);
-
-canvas.toBlob(blob=>{
-
-resolve(blob);
-
-},"image/webp",0.7);
-
-};
-
-reader.readAsDataURL(file);
-
-});
-
-}
-
-
-
-/* ADD MENU ITEM */
-
-window.addMenuItem=async()=>{
-
-const name=document.getElementById("itemName").value;
-const price=Number(document.getElementById("itemPrice").value);
-const category=document.getElementById("itemCategory").value;
-
-const file=document.getElementById("itemImage").files[0];
-
-if(!file){
-
-alert("Select image");
-
-return;
-
-}
-
-const compressed=await compressImage(file);
-
-const imageRef=ref(storage,"menu/"+Date.now()+".webp");
-
-await uploadBytes(imageRef,compressed);
-
-const imageUrl=await getDownloadURL(imageRef);
-
-await addDoc(collection(db,"menu"),{
-
-name,
-price,
-category,
-image:imageUrl,
-available:true
-
-});
-
-};
-
-
-
-/* LOAD MENU */
-
-function loadMenu(){
-
-onSnapshot(collection(db,"menu"),snap=>{
+const snapshot = await getDocs(collection(db,"menu"));
 
 menuList.innerHTML="";
 
-snap.forEach(docSnap=>{
+snapshot.forEach(docSnap=>{
 
-const m=docSnap.data();
+const data = docSnap.data();
+const id = docSnap.id;
 
-menuList.innerHTML+=`
+const div = document.createElement("div");
 
-<div class="menu-box">
+div.className="menu-item";
 
-<b>${m.name}</b>
+div.innerHTML=`
 
-<br>
+<img src="${data.image}">
 
-₹${m.price}
+<span>${data.name} ₹${data.price}</span>
 
-<br>
+<div>
 
-Status: ${m.available?"Available":"Disabled"}
+<button onclick="toggleItem('${id}',${!data.available})">
 
-<br>
+${data.available ? "Disable" : "Enable"}
 
-<button onclick="toggleMenu('${docSnap.id}',${m.available})">
-${m.available?"Disable":"Enable"}
 </button>
 
-<button onclick="editPrice('${docSnap.id}')">
-Edit Price
-</button>
+<button onclick="deleteItem('${id}')">
 
-<button onclick="deleteMenu('${docSnap.id}')">
 Delete
+
 </button>
 
 </div>
 
 `;
 
-});
+menuList.appendChild(div);
 
 });
 
 }
 
 
-
-/* ENABLE / DISABLE ITEM */
-
-window.toggleMenu=async(id,current)=>{
+window.toggleItem = async (id,status)=>{
 
 await updateDoc(doc(db,"menu",id),{
-
-available:!current
-
+available:status
 });
 
-};
+loadMenu();
+
+}
 
 
-
-/* EDIT PRICE */
-
-window.editPrice=async(id)=>{
-
-const price=prompt("Enter new price");
-
-if(!price) return;
-
-await updateDoc(doc(db,"menu",id),{
-
-price:Number(price)
-
-});
-
-};
-
-
-
-/* DELETE ITEM */
-
-window.deleteMenu=async(id)=>{
+window.deleteItem = async (id)=>{
 
 if(!confirm("Delete item?")) return;
 
 await deleteDoc(doc(db,"menu",id));
 
-};
+loadMenu();
+
+}
 
 </script>
 
