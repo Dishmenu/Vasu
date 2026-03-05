@@ -313,16 +313,13 @@ menuList.innerHTML += `
 <img src="${d.image}">
 
 <div>
-
 <b>${d.name}</b><br>
-₹${d.price}
-
+₹${d.price}<br>
+Category: ${d.category}
 </div>
 
 <button onclick="toggleItem('${id}',${!d.available})">
-
 ${d.available ? "Disable" : "Enable"}
-
 </button>
 
 <button onclick="deleteItem('${id}')">Delete</button>
@@ -394,4 +391,5 @@ Total ₹${d.total}
 </body>
 
 </html>
+
 
