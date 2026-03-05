@@ -1,120 +1,49 @@
-<!DOCTYPE html>
+=<!DOCTYPE html>
 <html>
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Restaurant Admin</title>
-
-<style>
-
-body{
-font-family:Arial;
-margin:0;
-background:#f4f4f4;
-}
-
-.container{
-max-width:900px;
-margin:auto;
-padding:20px;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:10px;
-margin-bottom:20px;
-}
-
-input,select{
-width:100%;
-padding:10px;
-margin-top:10px;
-}
-
-button{
-margin-top:10px;
-padding:10px;
-background:#c62828;
-color:white;
-border:none;
-cursor:pointer;
-}
-
-.menuItem{
-display:flex;
-align-items:center;
-gap:10px;
-border-bottom:1px solid #eee;
-padding:10px 0;
-}
-
-.menuItem img{
-width:60px;
-height:60px;
-object-fit:cover;
-border-radius:5px;
-}
-
-.orderCard{
-border:1px solid #ddd;
-padding:10px;
-margin-top:10px;
-}
-
-</style>
+<title>Admin</title>
 
 </head>
 
 <body>
 
-<div class="container">
-
-<div class="card" id="loginBox">
-
 <h2>Admin Login</h2>
 
 <input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
+<input id="password" type="password">
 
 <button onclick="login()">Login</button>
 
-</div>
-
 <div id="adminPanel" style="display:none">
-
-<div class="card">
 
 <h3>Add Menu Item</h3>
 
-<input id="name" placeholder="Item name">
-
+<input id="name" placeholder="Name">
 <input id="price" type="number" placeholder="Price">
 
 <select id="category">
-<option>Biryani</option>
-<option>Rice</option>
-<option>Starter</option>
-<option>Drink</option>
+<option value="biryani">Biryani</option>
+<option value="starters">Starters</option>
+<option value="fry">Fry</option>
+<option value="family">Family</option>
+<option value="drinks">Drinks</option>
 </select>
 
-<input type="file" id="image">
+<input id="image" type="file">
 
 <button onclick="addItem()">Add Item</button>
 
-</div>
-
-<div class="card">
+<hr>
 
 <h3>Menu Items</h3>
 
 <div id="menuList"></div>
 
-</div>
-
-<div class="card">
+<hr>
 
 <h3>Orders</h3>
 
@@ -122,26 +51,15 @@ margin-top:10px;
 
 </div>
 
-<button onclick="logout()">Logout</button>
-
-</div>
-
-</div>
-
-<audio id="alarm">
-<source src="alert.mp3">
-</audio>
-
 <script type="module">
 
-import { initializeApp } from
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
 import {
 getAuth,
 signInWithEmailAndPassword,
-onAuthStateChanged,
-signOut
+onAuthStateChanged
 }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -150,30 +68,25 @@ getFirestore,
 collection,
 addDoc,
 getDocs,
-deleteDoc,
 doc,
 updateDoc,
+deleteDoc,
 onSnapshot
 }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = {
-
-  apiKey: "AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
-  authDomain: "reddy-gari-biryani.firebaseapp.com",
-  projectId: "reddy-gari-biryani"
+const firebaseConfig={
+apiKey: "AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
+authDomain: "reddy-gari-biryani.firebaseapp.com",
+projectId: "reddy-gari-biryani"
 };
 
-const app = initializeApp(firebaseConfig);
+const app=initializeApp(firebaseConfig);
 
-const auth = getAuth();
-const db = getFirestore();
+const auth=getAuth();
+const db=getFirestore();
 
-const alarm = document.getElementById("alarm");
-
-window.login = async ()=>{
-
-try{
+window.login=async()=>{
 
 await signInWithEmailAndPassword(
 auth,
@@ -181,157 +94,92 @@ email.value,
 password.value
 );
 
-}catch(e){
-
-alert(e.message);
-
-}
-
-};
-
-window.logout = async ()=>{
-
-await signOut(auth);
-
 };
 
 onAuthStateChanged(auth,user=>{
 
 if(user){
-
-loginBox.style.display="none";
 adminPanel.style.display="block";
-
 loadMenu();
 listenOrders();
-
-}else{
-
-loginBox.style.display="block";
-adminPanel.style.display="none";
-
 }
 
 });
 
 async function uploadImage(file){
 
-const formData = new FormData();
+const formData=new FormData();
 
 formData.append("file",file);
 formData.append("upload_preset","menu_upload");
 
-const res = await fetch(
+const res=await fetch(
 "https://api.cloudinary.com/v1_1/ddf7lhtbe/image/upload",
 {
 method:"POST",
 body:formData
 });
 
-const data = await res.json();
+const data=await res.json();
 
 return data.secure_url;
 
 }
 
-window.addItem = async () => {
+window.addItem=async()=>{
 
-const nameField = document.getElementById("name");
-const priceField = document.getElementById("price");
-const categoryField = document.getElementById("category");
-const imageField = document.getElementById("image");
+const file=image.files[0];
 
-const name = nameField.value.trim();
-const price = Number(priceField.value);
-const category = categoryField.value;
-const file = imageField.files[0];
-
-if(!name){
-alert("Enter item name");
-return;
-}
-
-if(!price){
-alert("Enter price");
-return;
-}
-
-if(!file){
-alert("Select image");
-return;
-}
-
-let imageURL;
-
-try{
-
-imageURL = await uploadImage(file);
-
-}catch(e){
-
-alert("Image upload failed");
-console.error(e);
-return;
-
-}
-
-if(!imageURL){
-alert("Image upload returned empty URL");
-return;
-}
+const imageURL=await uploadImage(file);
 
 await addDoc(collection(db,"menu"),{
 
-name:name,
-price:price,
-category:category,
+name:name.value,
+price:Number(price.value),
+category:category.value,
 image:imageURL,
-available:true,
-timestamp:Date.now()
+available:true
 
 });
-
-alert("Item added");
 
 loadMenu();
 
 };
+
 async function loadMenu(){
 
-const snapshot = await getDocs(collection(db,"menu"));
+const snap=await getDocs(collection(db,"menu"));
 
 menuList.innerHTML="";
 
-snapshot.forEach(docSnap=>{
+snap.forEach(docSnap=>{
 
-const d = docSnap.data();
-const id = docSnap.id;
+const d=docSnap.data();
+const id=docSnap.id;
 
-menuList.innerHTML += `
-<div class="menuItem">
-
-<img src="${d.image}">
+menuList.innerHTML+=`
 
 <div>
-<b>${d.name}</b><br>
-₹${d.price}<br>
-Category: ${d.category}
-</div>
 
-<button onclick="toggleItem('${id}',${!d.available})">
-${d.available ? "Disable" : "Enable"}
+<b>${d.name}</b> ₹${d.price}
+
+<button onclick="toggle('${id}',${!d.available})">
+
+${d.available?"Disable":"Enable"}
+
 </button>
 
-<button onclick="deleteItem('${id}')">Delete</button>
+<button onclick="removeItem('${id}')">Delete</button>
 
 </div>
+
 `;
 
 });
 
 }
 
-window.toggleItem = async (id,status)=>{
+window.toggle=async(id,status)=>{
 
 await updateDoc(doc(db,"menu",id),{
 available:status
@@ -341,7 +189,7 @@ loadMenu();
 
 }
 
-window.deleteItem = async (id)=>{
+window.removeItem=async(id)=>{
 
 await deleteDoc(doc(db,"menu",id));
 
@@ -351,33 +199,40 @@ loadMenu();
 
 function listenOrders(){
 
-onSnapshot(collection(db,"orders"), snapshot =>{
+onSnapshot(collection(db,"orders"),snap=>{
 
 ordersList.innerHTML="";
 
-snapshot.docChanges().forEach(change=>{
+snap.forEach(docSnap=>{
 
-if(change.type === "added"){
+const d=docSnap.data();
 
-alarm.play();
+let itemsHTML="";
 
-}
-
+d.items.forEach(i=>{
+itemsHTML+=`${i.name} × ${i.qty}<br>`;
 });
 
-snapshot.forEach(docSnap=>{
+ordersList.innerHTML+=`
 
-const d = docSnap.data();
+<div>
 
-ordersList.innerHTML += `
-<div class="orderCard">
-
-<b>${d.name}</b><br>
+<b>Order ID:</b> ${d.orderId}<br>
+${d.name}<br>
 ${d.phone}<br>
-${d.address}<br>
+
+${itemsHTML}
+
 Total ₹${d.total}
 
+<button onclick="status('${docSnap.id}','accepted')">Accept</button>
+
+<button onclick="status('${docSnap.id}','out_for_delivery')">Out</button>
+
+<button onclick="status('${docSnap.id}','delivered')">Delivered</button>
+
 </div>
+
 `;
 
 });
@@ -386,10 +241,15 @@ Total ₹${d.total}
 
 }
 
+window.status=async(id,status)=>{
+
+await updateDoc(doc(db,"orders",id),{
+status:status
+});
+
+}
+
 </script>
 
 </body>
-
 </html>
-
-

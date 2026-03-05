@@ -1,307 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+
 <meta charset="UTF-8">
-<title>Menu - Reddy Gari Biryani</title>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-.menu-page {
-  padding: 40px 6% 120px;
-  background: #fff;
-}
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-/* SEARCH */
-.menu-search-box {
-  text-align: center;
-  margin-bottom: 25px;
-}
-.menu-search-box input {
-  width: 100%;
-  max-width: 560px;
-  padding: 14px 20px;
-  font-size: 16px;
-  border-radius: 12px;
-  border: 2px solid #ddd;
-}
+<title>Menu</title>
 
-/* CATEGORY FILTER */
-.menu-categories {
-  display: flex;
-  gap: 14px;
-  overflow-x: auto;
-  padding-bottom: 20px;
-}
-.menu-categories::-webkit-scrollbar { display: none; }
+<link rel="stylesheet" href="menu.css">
 
-.cat-btn {
-  padding: 10px 18px;
-  border-radius: 22px;
-  border: 2px solid #ddd;
-  background: #fff;
-  font-size: 15px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.cat-btn.active {
-  background: #c62828;
-  border-color: #c62828;
-  color: #fff;
-}
-
-/* GRID */
-.menu-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 26px;
-}
-
-/* CARD BASE */
-/* CARD BASE */
-.menu-card {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* CENTER DESKTOP CONTENT */
-  text-align: center;
-  gap: 14px;
-}
-
-/* IMAGE DESKTOP */
-.menu-img {
-  width: 100%;
-  height: 170px;
-  object-fit: cover;
-  border-radius: 14px;
-}
-
-/* NAME */
-.menu-info h3 {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-.short-desc {
-  font-size: 14px;
-  color: #666;
-  margin: 4px 0 10px;
-  line-height: 1.4;
-}
-/* PRICE + QTY ROW */
-.row-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-/* PRICE */
-.price {
-  font-size: 20px;
-  font-weight: 700;
-  color: #c62828;
-}
-
-/* QTY */
-.qty-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.qty-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  background: #c62828;
-  color: #fff;
-  font-size: 20px;
-  border: none;
-  cursor: pointer;
-}
-
-.qty-input {
-  width: 45px;
-  text-align: center;
-  padding: 4px;
-  font-size: 16px;
-  border-radius: 6px;
-  border: 2px solid #ddd;
-}
-
-/* ADD BUTTON */
-.addcart-btn {
-  width: 100%;
-  background: #c62828;
-  padding: 10px 0;
-  border-radius: 12px;
-  border: none;
-  color: white;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* 📱 MOBILE SPLIT VIEW */
-@media (max-width: 768px) {
-
-  .menu-card {
-    flex-direction: row;
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  .menu-img {
-    width: 120px;
-    height: 120px;
-  }
-
-  .menu-info {
-    flex: 1;
-  }
-
-  .row-info {
-    gap: 10px;
-    justify-content: flex-start;
-  }
-}
-/* FLOATING CART */
-.floating-cart {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  background: #c62828;
-  color: #fff;
-  font-size: 26px;
-  padding: 16px;
-  border-radius: 50%;
-  text-decoration: none;
-  box-shadow: 0 10px 22px rgba(0,0,0,0.15);
-}
-
-/* RESPONSIVE */
-@media (max-width: 1024px){
-  .menu-grid { grid-template-columns: repeat(3, 1fr); }
-}
-
-@media (max-width: 768px){
-  .menu-grid { grid-template-columns: repeat(1, 1fr); }
-
-  .menu-card {
-    flex-direction: row;
-    gap: 16px;
-    align-items: flex-start;
-  }
-
-  .menu-img {
-    width: 120px;
-    height: 120px;
-  }
-  .short-desc {
-    font-size: 13px;
-    margin: 2px 0 6px;
-  }
-}
-@media (max-width: 480px){
-  .menu-img {
-    width: 100px;
-    height: 100px;
-  }
-}
-/* CART COUNT BADGE */
-.floating-cart {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  background: #c62828;
-  color: white;
-  font-size: 26px;
-  padding: 16px;
-  border-radius: 50%;
-  text-decoration: none;
-  box-shadow: 0 10px 22px rgba(0,0,0,0.15);
-}
-
-#cartCount {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #ffcc00;
-  color: #000;
-  font-size: 14px;
-  font-weight: 700;
-  min-width: 22px;
-  height: 22px;
-  padding: 2px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-#toast {
-  position: fixed;
-  bottom: -80px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #c62828;
-  color: white;
-  padding: 14px 22px;
-  border-radius: 8px;
-  font-size: 15px;
-  transition: 0.4s;
-  z-index: 9999;
-}
-#toast.show {
-  bottom: 30px;
-}
-</style>
 </head>
+
 <body>
 
 <section class="menu-page">
 
-  <!-- Search -->
-  <div class="menu-search-box">
-    <input type="text" id="searchInput" placeholder="Search for biryani, fry items..." />
-  </div>
+<div class="menu-search-box">
+<input type="text" id="searchInput" placeholder="Search items">
+</div>
 
-  <!-- Category Tabs -->
-  <div class="menu-categories">
-    <button class="cat-btn active" data-category="all">All</button>
-    <button class="cat-btn" data-category="biryani">Biryani</button>
-    <button class="cat-btn" data-category="starters">Starters</button>
-    <button class="cat-btn" data-category="fry">Fry Items</button>
-    <button class="cat-btn" data-category="family">Family Packs</button>
-    <button class="cat-btn" data-category="drinks">Drinks</button>
-  </div>
+<div class="menu-categories">
 
-  <!-- Menu Grid -->
-  <div class="menu-grid" id="menuGrid"></div>
-  <!-- Floating Cart Button -->
-  <a href="cart.html" class="floating-cart">🛒<span id="cartCount">0</span></a>
+<button class="cat-btn active" data-category="all">All</button>
+<button class="cat-btn" data-category="biryani">Biryani</button>
+<button class="cat-btn" data-category="starters">Starters</button>
+<button class="cat-btn" data-category="fry">Fry</button>
+<button class="cat-btn" data-category="family">Family</button>
+<button class="cat-btn" data-category="drinks">Drinks</button>
+
+</div>
+
+<div class="menu-grid" id="menuGrid"></div>
+
+<a href="cart.html" class="floating-cart">
+🛒
+<span id="cartCount">0</span>
+</a>
 
 </section>
-<div id="toast">Added to cart</div>
+
+<div id="toast"></div>
+
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
 import {
 getFirestore,
 collection,
 getDocs
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+}
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* FIREBASE CONFIG */
 const firebaseConfig = {
- apiKey: "AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
- authDomain: "reddy-gari-biryani.firebaseapp.com",
- projectId: "reddy-gari-biryani",
- storageBucket: "reddy-gari-biryani.appspot.com",
- messagingSenderId: "83117980930",
- appId: "1:83117980930:web:5672bbedf6f8aafb88961b"
+
+apiKey: "AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
+authDomain: "reddy-gari-biryani.firebaseapp.com",
+projectId: "reddy-gari-biryani",
+
 };
 
 const app = initializeApp(firebaseConfig);
@@ -309,68 +66,71 @@ const db = getFirestore(app);
 
 const menuGrid = document.getElementById("menuGrid");
 
-/* LOAD MENU FROM FIRESTORE */
 async function loadMenu(){
 
- const snap = await getDocs(collection(db,"menu"));
+const snap = await getDocs(collection(db,"menu"));
 
- menuGrid.innerHTML="";
+menuGrid.innerHTML="";
 
- snap.forEach(docSnap=>{
+snap.forEach(docSnap=>{
 
- const item = docSnap.data();
+const item = docSnap.data();
 
- if(!item.available) return;
+if(!item.available) return;
 
- const card = document.createElement("div");
+const category = (item.category || "other").toLowerCase();
 
- card.className="menu-card";
- card.dataset.category=item.category;
- card.dataset.price=item.price;
+const card=document.createElement("div");
 
- card.innerHTML=`
+card.className="menu-card";
+card.dataset.category=category;
+card.dataset.price=item.price;
 
- <img class="menu-img" src="${item.image}">
+card.innerHTML=`
 
- <div class="menu-info">
+<img class="menu-img" src="${item.image}">
 
- <h3>${item.name}</h3>
- <p class="short-desc">${item.desc}</p>
+<div class="menu-info">
 
- <div class="row-info">
+<h3>${item.name}</h3>
 
- <p class="price">₹${item.price}</p>
+<p class="short-desc">${item.desc || ""}</p>
 
- <div class="qty-row">
+<div class="row-info">
 
- <button class="qty-btn minus">-</button>
- <input type="number" class="qty-input" value="1" min="1">
- <button class="qty-btn plus">+</button>
+<p class="price">₹${item.price}</p>
 
- </div>
+<div class="qty-row">
 
- </div>
+<button class="qty-btn minus">-</button>
 
- <button class="addcart-btn">Add to Cart</button>
+<input class="qty-input" type="number" value="1" min="1">
 
- </div>
- `;
+<button class="qty-btn plus">+</button>
 
- menuGrid.appendChild(card);
+</div>
 
- attachCardEvents(card);
+</div>
 
- });
+<button class="addcart-btn">Add to Cart</button>
+
+</div>
+`;
+
+menuGrid.appendChild(card);
+
+attachEvents(card);
+
+});
 
 }
 
 loadMenu();
 
-/* CARD EVENTS */
-
-function attachCardEvents(card){
+function attachEvents(card){
 
 const basePrice=parseInt(card.dataset.price);
+
 const priceEl=card.querySelector(".price");
 const qtyInput=card.querySelector(".qty-input");
 
@@ -406,13 +166,12 @@ cart.push({name,img,price,qty});
 localStorage.setItem("cart",JSON.stringify(cart));
 
 updateCartCount();
+
 showToast(name+" added");
 
 };
 
 }
-
-/* CART COUNT */
 
 function updateCartCount(){
 
@@ -428,28 +187,26 @@ document.getElementById("cartCount").textContent=total;
 
 updateCartCount();
 
-/* TOAST */
-
 function showToast(msg){
 
 const toast=document.getElementById("toast");
 
 toast.textContent=msg;
+
 toast.classList.add("show");
 
 setTimeout(()=>{
 toast.classList.remove("show");
-},1700);
+},1500);
 
 }
-
-/* CATEGORY FILTER */
 
 document.querySelectorAll(".cat-btn").forEach(btn=>{
 
 btn.onclick=()=>{
 
 document.querySelectorAll(".cat-btn").forEach(b=>b.classList.remove("active"));
+
 btn.classList.add("active");
 
 const cat=btn.dataset.category;
@@ -466,8 +223,6 @@ card.style.display=(cat==="all"||itemCat===cat)?"flex":"none";
 
 });
 
-/* SEARCH */
-
 document.getElementById("searchInput").addEventListener("input",()=>{
 
 const val=searchInput.value.toLowerCase();
@@ -483,5 +238,6 @@ card.style.display=name.includes(val)?"flex":"none";
 });
 
 </script>
+
 </body>
 </html>
