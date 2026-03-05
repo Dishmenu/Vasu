@@ -234,34 +234,68 @@ return data.secure_url;
 
 }
 
-window.addItem = async ()=>{
+window.addItem = async () => {
 
-const file = image.files[0];
+const nameField = document.getElementById("name");
+const priceField = document.getElementById("price");
+const categoryField = document.getElementById("category");
+const imageField = document.getElementById("image");
+
+const name = nameField.value.trim();
+const price = Number(priceField.value);
+const category = categoryField.value;
+const file = imageField.files[0];
+
+if(!name){
+alert("Enter item name");
+return;
+}
+
+if(!price){
+alert("Enter price");
+return;
+}
 
 if(!file){
-
 alert("Select image");
+return;
+}
+
+let imageURL;
+
+try{
+
+imageURL = await uploadImage(file);
+
+}catch(e){
+
+alert("Image upload failed");
+console.error(e);
 return;
 
 }
 
-const imageURL = await uploadImage(file);
+if(!imageURL){
+alert("Image upload returned empty URL");
+return;
+}
 
 await addDoc(collection(db,"menu"),{
 
-name:name.value,
-price:Number(price.value),
-category:category.value,
+name:name,
+price:price,
+category:category,
 image:imageURL,
 available:true,
 timestamp:Date.now()
 
 });
 
+alert("Item added");
+
 loadMenu();
 
 };
-
 async function loadMenu(){
 
 const snapshot = await getDocs(collection(db,"menu"));
@@ -360,3 +394,4 @@ Total ₹${d.total}
 </body>
 
 </html>
+
