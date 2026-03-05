@@ -118,7 +118,7 @@ async function loadOrders() {
       <p><b>Order ID:</b> ${o.orderId || o.id}</p>
       <p><b>Total:</b> ₹${o.total}</p>
       <p><b>Status:</b> ${o.status}</p>
-      <p><b>Date:</b> ${new Date(o.date).toLocaleString()}</p>
+      <p><b>Date:</b> ${new Date(o.timestamp).toLocaleString()}</p>
     </div>
   `).join("");
 }

@@ -1,262 +1,96 @@
 <!DOCTYPE html>
 <html>
 <head>
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Track Order</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-body {
-  margin: 0;
-  padding: 40px 6%;
-  font-family: Poppins, sans-serif;
-  background: #fff9f3;
+
+body{
+font-family:Poppins,sans-serif;
+padding:40px;
+background:#fff9f3;
+text-align:center;
 }
 
-h2 {
-  font-size: 28px;
-  margin-bottom: 20px;
-  font-weight: 700;
-  text-align: center;
+.track-box{
+background:white;
+padding:30px;
+border-radius:16px;
+max-width:420px;
+margin:auto;
+box-shadow:0 4px 16px rgba(0,0,0,0.1);
 }
 
-#trackBox {
-  background: #fff;
-  padding: 25px;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  max-width: 600px;
-  margin: 0 auto;
+.status{
+font-size:20px;
+font-weight:600;
+color:#c62828;
+margin-top:10px;
 }
 
-input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  margin-bottom: 15px;
-  font-size: 16px;
-}
-
-button {
-  width: 100%;
-  padding: 12px;
-  background: #c62828;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 17px;
-  cursor: pointer;
-  margin-bottom: 20px;
-}
 </style>
+
 </head>
 
 <body>
 
-<h2>Track Your Order</h2>
+<div class="track-box">
 
-<input id="orderInput" type="text" placeholder="Enter Order ID">
-<button onclick="startTracking()">Track Order</button>
+<h2>Track Order</h2>
 
-<div id="trackBox"></div>
+<p id="orderId">Loading...</p>
+
+<p>Status:</p>
+
+<div class="status" id="status">Loading...</div>
+
+</div>
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { 
-  getFirestore, 
-  doc, 
-  getDoc, 
-  onSnapshot 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
+import {
+getFirestore,
+doc,
+onSnapshot
+}
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// ------------------
-// FIREBASE CONFIG
-// ------------------
-const firebaseConfig = {
-  apiKey: "AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
-  authDomain: "reddy-gari-biryani.firebaseapp.com",
-  projectId: "reddy-gari-biryani",
-  storageBucket: "reddy-gari-biryani.appspot.com",
-  messagingSenderId: "83117980930",
-  appId: "1:83117980930:web:5672bbedf6f8aafb88961b"
-};
+const app = initializeApp({
+  apiKey:"AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
+  authDomain:"reddy-gari-biryani.firebaseapp.com",
+  projectId:"reddy-gari-biryani"
+});
 
-const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const trackBox = document.getElementById("trackBox");
+const params =
+new URLSearchParams(window.location.search);
 
+const orderId = params.get("orderId");
 
-// ============================================
-// FUNCTION: Try fetching from both collections
-// ============================================
-async function fetchOrder(orderId) {
+document.getElementById("orderId").innerText =
+"Order ID: "+orderId;
 
-  // 1. Look in ACTIVE orders
-  const activeRef = doc(db, "orders", orderId);
-  const activeSnap = await getDoc(activeRef);
+onSnapshot(doc(db,"orders",orderId),(snap)=>{
 
-  if (activeSnap.exists()) {
-    return { data: activeSnap.data(), type: "active" };
-  }
+if(!snap.exists()) return;
 
-  // 2. Look in HISTORY orders
-  const historyRef = doc(db, "orders_history", orderId);
-  const historySnap = await getDoc(historyRef);
+const d = snap.data();
 
-  if (historySnap.exists()) {
-    return { data: historySnap.data(), type: "history" };
-  }
+document.getElementById("status").innerText =
+d.status;
 
-  return null;
+});
+
+if(!orderId){
+document.getElementById("status").innerText="Invalid Order ID";
+throw new Error("No orderId");
 }
-
-
-
-// ===============================
-// MAIN TRACKING FUNCTION
-// ===============================
-window.startTracking = async function () {
-
-  const orderId = document.getElementById("orderInput").value.trim();
-
-  if (!orderId) {
-    trackBox.innerHTML = "<p>Please enter a valid Order ID.</p>";
-    return;
-  }
-
-  trackBox.innerHTML = "<p>Loading...</p>";
-
-  const result = await fetchOrder(orderId);
-
-  // ------------------------------------------
-  // INVALID ORDER ID
-  // ------------------------------------------
-  if (!result) {
-    trackBox.innerHTML = "<p>❌ Order not found. Check your Order ID.</p>";
-    return;
-  }
-
-  const order = result.data;
-  const type = result.type;
-
-
-
-  // ====================================================
-  // CASE 1: ORDER IS ACTIVE → USE REALTIME LIVE TRACKING
-  // ====================================================
-  if (type === "active") {
-
-    const ref = doc(db, "orders", orderId);
-
-    onSnapshot(ref, (snap) => {
-
-      if (!snap.exists()) {
-        trackBox.innerHTML = "<p>Order moved to history. Refresh and track again.</p>";
-        return;
-      }
-
-      const o = snap.data();
-
-      renderActiveTimeline(o);
-    });
-
-    return;
-  }
-
-
-
-  // =====================================================
-  // CASE 2: ORDER IS DELIVERED → SHOW STATIC HISTORY DATA
-  // =====================================================
-  if (type === "history") {
-    renderDelivered(order);
-  }
-
-};
-
-
-
-
-// =============================
-// UI: ACTIVE ORDER TIMELINE
-// =============================
-function renderActiveTimeline(order) {
-
-  trackBox.innerHTML = `
-    <p><b>Name:</b> ${order.name}</p>
-    <p><b>Status:</b> ${order.status.replaceAll("_"," ")}</p>
-
-    <hr><br>
-
-    <div class="status-timeline">
-
-      <div class="status-step active">
-        <div class="step-title">Order Placed</div>
-      </div>
-
-      <div class="status-step ${(order.status!=="pending")?"active":""}">
-        <div class="step-title">Order Accepted</div>
-      </div>
-
-      <div class="status-step ${(order.status==="preparing" || order.status==="out_for_delivery" || order.status==="delivered")?"active":""}">
-        <div class="step-title">Preparing</div>
-      </div>
-
-      <div class="status-step ${(order.status==="out_for_delivery" || order.status==="delivered")?"active":""}">
-        <div class="step-title">Out For Delivery</div>
-      </div>
-
-      <div class="status-step ${(order.status==="delivered")?"active":""}">
-        <div class="step-title">Delivered</div>
-      </div>
-
-    </div>
-  `;
-}
-
-
-
-// =============================
-// UI: DELIVERED (HISTORY ORDER)
-// =============================
-function renderDelivered(order) {
-
-  trackBox.innerHTML = `
-    <p><b>Order ID:</b> ${order.orderId}</p>
-    <p><b>Status:</b> Delivered</p>
-    <p><b>Total:</b> ${order.total}</p>
-    <p><b>Date:</b> ${new Date(order.date).toLocaleString()}</p>
-
-    <hr><br>
-
-    <div class="status-timeline">
-
-      <div class="status-step active">
-        <div class="step-title">Order Placed</div>
-      </div>
-
-      <div class="status-step active">
-        <div class="step-title">Order Accepted</div>
-      </div>
-
-      <div class="status-step active">
-        <div class="step-title">Preparing</div>
-      </div>
-
-      <div class="status-step active">
-        <div class="step-title">Out For Delivery</div>
-      </div>
-
-      <div class="status-step active">
-        <div class="step-title">Delivered</div>
-      </div>
-
-    </div>
-  `;
-}
-
 </script>
 
 </body>

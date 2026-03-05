@@ -127,6 +127,7 @@ window.payAndPlaceOrder = async function () {
   // COD
   if (method === "cod") {
     await setDoc(doc(db,"orders",orderId), {
+      orderId: orderId,
       name: nameVal,
       phone: phoneVal,
       address: addressVal,
@@ -147,7 +148,7 @@ window.payAndPlaceOrder = async function () {
 
   // RAZORPAY
   var options = {
-    key: "rzp_live_SMmb5C4cAxzHL1",
+    key: "rzp_test_SMgRiOxwLmh0lO",
     amount: total * 100,
     currency: "INR",
     name: "Reddy Gari Biryani",
@@ -170,7 +171,7 @@ window.payAndPlaceOrder = async function () {
       localStorage.setItem("lastOrderId", orderId);
       localStorage.removeItem("cart");
 
-      window.location.href = "order-success.html";
+      window.location.href = "order-success.html?orderId=" + orderId;
     }
   };
 
@@ -180,5 +181,4 @@ window.payAndPlaceOrder = async function () {
 
 </script>
 </body>
-
 </html>

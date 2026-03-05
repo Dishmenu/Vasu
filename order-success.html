@@ -35,7 +35,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, doc, getDoc } 
-    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
@@ -48,49 +48,57 @@ const app = initializeApp({
 
 const db = getFirestore(app);
 
-// LOAD orderId from localStorage
-const orderId = localStorage.getItem("lastOrderId");
+const params = new URLSearchParams(window.location.search);
+const orderId = params.get("orderId");
 
-if (!orderId) {
-  invoiceDetails.innerHTML = "<p style='color:red;'>Order ID missing.</p>";
-  document.getElementById("trackBtn").style.display = "none";
-} else {
+if(!orderId){
+  invoiceDetails.innerHTML =
+  "<p style='color:red'>Order ID missing</p>";
+}else{
   loadInvoice();
-  localStorage.removeItem("lastOrderId");
 }
 
-async function loadInvoice() {
-  const snap = await getDoc(doc(db, "orders", orderId));
+async function loadInvoice(){
 
-  if (!snap.exists()) {
-    invoiceDetails.innerHTML = "<p style='color:red;'>Order not found!</p>";
+  const snap = await getDoc(doc(db,"orders",orderId));
+
+  if(!snap.exists()){
+    invoiceDetails.innerHTML =
+    "<p style='color:red'>Order not found</p>";
     return;
   }
 
   const d = snap.data();
 
   invoiceDetails.innerHTML = `
-    <p><b>Order ID:</b> ${orderId}</p>
-    <p><b>Name:</b> ${d.name}</p>
-    <p><b>Phone:</b> ${d.phone}</p>
-    <p><b>Address:</b> ${d.address}</p>
-    <p><b>Payment:</b> ${d.payMethod}</p>
-    <p><b>Total:</b> ₹${d.total}</p>
-    <hr>
-    <b>Items:</b>
-    ${d.items.map(i => `<p>${i.name} × ${i.qty}</p>`).join("")}
+  <p><b>Order ID:</b> ${orderId}</p>
+  <p><b>Name:</b> ${d.name}</p>
+  <p><b>Phone:</b> ${d.phone}</p>
+  <p><b>Address:</b> ${d.address}</p>
+  <p><b>Payment:</b> ${d.payMethod}</p>
+  <p><b>Total:</b> ₹${d.total}</p>
+  <hr>
+  <b>Items:</b>
+  ${d.items.map(i=>`<p>${i.name} × ${i.qty}</p>`).join("")}
   `;
 
-  document.getElementById("trackBtn").onclick = () => {
-    window.location.href = "order-track.html?orderId=" + orderId;
+  document.getElementById("trackBtn").onclick = ()=>{
+    window.location.href =
+    "order-track.html?orderId=" + orderId;
   };
 
-  document.getElementById("wpBtn").onclick = () => {
-    let msg = `Order ID: ${orderId}\n\nItems:\n` +
-              d.items.map(i => `• ${i.name} × ${i.qty}`).join("\n");
+  document.getElementById("wpBtn").onclick = ()=>{
 
-    window.open(`https://wa.me/919908500325?text=${encodeURIComponent(msg)}`);
+    let msg =
+    "Order ID: "+orderId+"\n\nItems:\n"+
+    d.items.map(i=>"• "+i.name+" × "+i.qty).join("\n");
+
+    window.open(
+    "https://wa.me/919908500325?text="+
+    encodeURIComponent(msg)
+    );
   };
+
 }
 
 </script>
