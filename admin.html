@@ -1,138 +1,94 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
 <meta charset="UTF-8">
-<title>Reddy Gari Biryani Admin</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Menu Admin</title>
+
 <style>
+
 body{
 font-family:Arial;
-background:#fafafa;
+background:#f5f5f5;
 margin:0;
 padding:20px;
 }
 
 .container{
-max-width:900px;
+max-width:700px;
 margin:auto;
 }
 
 .card{
 background:white;
 padding:20px;
-border-radius:12px;
-box-shadow:0 5px 15px rgba(0,0,0,0.08);
+border-radius:10px;
 margin-bottom:20px;
 }
 
 input,select{
 width:100%;
-padding:12px;
-border:1px solid #ddd;
-border-radius:6px;
+padding:10px;
 margin-top:10px;
 }
 
 button{
+margin-top:10px;
+padding:10px;
 background:#c62828;
 color:white;
 border:none;
-padding:12px 18px;
-border-radius:6px;
 cursor:pointer;
-font-weight:bold;
 }
 
-button:hover{
-background:#a61e1e;
-}
-
-.menu-list{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:15px;
-margin-top:20px;
-}
-
-.menu-card{
-background:white;
-padding:12px;
-border-radius:10px;
+.menuItem{
 display:flex;
 align-items:center;
 gap:10px;
-box-shadow:0 2px 8px rgba(0,0,0,0.05);
+border-bottom:1px solid #eee;
+padding:10px 0;
 }
 
-.menu-card img{
-width:70px;
-height:70px;
+.menuItem img{
+width:60px;
+height:60px;
 object-fit:cover;
-border-radius:6px;
 }
 
-.menu-actions button{
-margin-right:5px;
-padding:6px 10px;
-font-size:12px;
-}
-
-@media(max-width:600px){
-
-.menu-list{
-grid-template-columns:1fr;
-}
-
-.menu-card{
-flex-direction:column;
-align-items:flex-start;
-}
-
-.menu-card img{
-width:100%;
-height:150px;
-}
-
-}
 </style>
 
 </head>
 
 <body>
 
-<div id="loginBox">
+<div class="container">
 
-<h2>Admin Login</h2>
+<div class="card" id="loginBox">
 
-<input id="email" placeholder="Admin Email">
+<h3>Admin Login</h3>
 
+<input id="email" placeholder="Email">
 <input id="password" type="password" placeholder="Password">
 
 <button onclick="login()">Login</button>
 
 </div>
 
-
-<div id="adminPanel" style="display:none">
-
-<h2>Menu Manager</h2>
-
-<button onclick="logout()">Logout</button>
+<div class="card" id="adminPanel" style="display:none">
 
 <h3>Add Menu Item</h3>
 
 <input id="name" placeholder="Item name">
-
 <input id="price" type="number" placeholder="Price">
 
 <select id="category">
-
 <option>Biryani</option>
 <option>Rice</option>
-<option>Starters</option>
-<option>Drinks</option>
-
+<option>Starter</option>
+<option>Drink</option>
 </select>
 
 <input type="file" id="image">
@@ -143,19 +99,24 @@ height:150px;
 
 <div id="menuList"></div>
 
+<button onclick="logout()">Logout</button>
+
 </div>
 
+</div>
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {initializeApp} from
+"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
 import {
 getAuth,
 signInWithEmailAndPassword,
 onAuthStateChanged,
 signOut
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+}
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
 getFirestore,
@@ -165,33 +126,21 @@ getDocs,
 deleteDoc,
 doc,
 updateDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-import {
-getStorage,
-ref,
-uploadBytes,
-getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
+}
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
-  authDomain: "reddy-gari-biryani.firebaseapp.com",
-  projectId: "reddy-gari-biryani",
-  storageBucket: "reddy-gari-biryani.appspot.com",
-  messagingSenderId: "83117980930",
-  appId: "1:83117980930:web:5672bbedf6f8aafb88961b"
+
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_PROJECT.firebaseapp.com",
+projectId: "YOUR_PROJECT_ID"
+
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 
-const db = getFirestore(app);
-
-const storage = getStorage(app);
-
+const auth = getAuth();
+const db = getFirestore();
 
 window.login = async ()=>{
 
@@ -201,15 +150,13 @@ email.value,
 password.value
 );
 
-}
-
+};
 
 window.logout = async ()=>{
 
 await signOut(auth);
 
-}
-
+};
 
 onAuthStateChanged(auth,user=>{
 
@@ -227,52 +174,55 @@ adminPanel.style.display="none";
 
 }
 
-})
+});
 
+async function uploadImage(file){
+
+const formData = new FormData();
+
+formData.append("file", file);
+formData.append("upload_preset","menu_upload");
+
+const response = await fetch(
+"https://api.cloudinary.com/v1_1/ddf7lhtbe/image/upload",
+{
+method:"POST",
+body:formData
+});
+
+const data = await response.json();
+
+return data.secure_url;
+
+}
 
 window.addItem = async ()=>{
 
 const file = image.files[0];
 
 if(!file){
-
-alert("Upload image");
+alert("Select image");
 return;
-
 }
 
-if(file.size > 2 * 1024 * 1024){
-
-alert("Image must be under 2MB");
-return;
-
-}
-
-const imageRef = ref(storage,"menu/"+Date.now()+".webp");
-
-await uploadBytes(imageRef,file);
-
-const url = await getDownloadURL(imageRef);
+const imageURL = await uploadImage(file);
 
 await addDoc(collection(db,"menu"),{
 
 name:name.value,
 price:Number(price.value),
 category:category.value,
-image:url,
+image:imageURL,
 available:true,
 timestamp:Date.now()
 
 });
 
-name.value="";
-price.value="";
-image.value="";
+alert("Item added");
 
 loadMenu();
 
-}
-
+};
 
 async function loadMenu(){
 
@@ -282,43 +232,35 @@ menuList.innerHTML="";
 
 snapshot.forEach(docSnap=>{
 
-const data = docSnap.data();
+const d = docSnap.data();
 const id = docSnap.id;
 
-const div = document.createElement("div");
+menuList.innerHTML += `
+<div class="menuItem">
 
-div.className="menu-item";
-
-div.innerHTML=`
-
-<img src="${data.image}">
-
-<span>${data.name} ₹${data.price}</span>
+<img src="${d.image}">
 
 <div>
 
-<button onclick="toggleItem('${id}',${!data.available})">
-
-${data.available ? "Disable" : "Enable"}
-
-</button>
-
-<button onclick="deleteItem('${id}')">
-
-Delete
-
-</button>
+<b>${d.name}</b><br>
+₹${d.price}
 
 </div>
 
-`;
+<button onclick="toggleItem('${id}',${!d.available})">
 
-menuList.appendChild(div);
+${d.available ? "Disable" : "Enable"}
+
+</button>
+
+<button onclick="deleteItem('${id}')">Delete</button>
+
+</div>
+`;
 
 });
 
 }
-
 
 window.toggleItem = async (id,status)=>{
 
@@ -330,10 +272,7 @@ loadMenu();
 
 }
 
-
 window.deleteItem = async (id)=>{
-
-if(!confirm("Delete item?")) return;
 
 await deleteDoc(doc(db,"menu",id));
 
@@ -344,4 +283,5 @@ loadMenu();
 </script>
 
 </body>
+
 </html>
