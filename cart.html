@@ -1,367 +1,314 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Menu - Reddy Gari Biryani</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><style
-</head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Your Cart</title>
+
 <style>
-body {
-  margin: 0;
-  font-family: Poppins, sans-serif;
-  background: #fff9f3;
+
+/* RESET */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Poppins,sans-serif;
 }
 
-.cart-page {
-  padding: 40px 6%;
+body{
+background:#fff9f3;
+padding:30px 6%;
 }
 
-h2 {
-  font-size: 28px;
-  margin-bottom: 30px;
+/* HEADER */
+
+header{
+font-size:26px;
+font-weight:600;
+margin-bottom:25px;
 }
 
-.cart-items {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
-  gap: 16px;
-}
-/* CART ITEM CARD */
-.cart-item {
-  display: grid;
-  grid-template-columns: 120px 1fr 120px 140px 80px;
-  align-items: center;
-  gap: 20px;
-  padding: 14px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+/* CART GRID */
+
+.cart-items{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:18px;
 }
 
-/* IMAGE */
-.cart-item img {
-  width: 120px;
-  height: 120px;
-  border-radius: 14px;
-  object-fit: cover;
+/* CARD */
+
+.cart-card{
+display:grid;
+grid-template-columns:120px 1fr;
+gap:14px;
+background:white;
+padding:14px;
+border-radius:16px;
+box-shadow:0 4px 16px rgba(0,0,0,0.06);
+align-items:center;
 }
 
-/* NAME */
-.cart-title {
-  font-size: 18px;
-  font-weight: 600;
+.cart-card img{
+width:120px;
+height:120px;
+border-radius:12px;
+object-fit:cover;
 }
 
-/* PRICE */
-.cart-price {
-  font-size: 20px;
-  font-weight: 700;
-  color: #c62828;
+/* INFO */
+
+.cart-info h3{
+font-size:17px;
+margin-bottom:6px;
+}
+
+.price{
+color:#c62828;
+font-weight:600;
+margin-bottom:8px;
 }
 
 /* QTY */
-.qty-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+
+.qty-row{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:8px;
 }
 
-.qty-btn {
-  width: 30px;
-  height: 30px;
-  background: #c62828;
-  border-radius: 6px;
-  border: none;
-  color: #fff;
-  font-size: 20px;
-  cursor: pointer;
+.qty-btn{
+width:28px;
+height:28px;
+border:none;
+background:#c62828;
+color:white;
+border-radius:6px;
+cursor:pointer;
+font-size:18px;
 }
 
-.qty-input {
-  width: 45px;
-  text-align: center;
-  font-size: 16px;
-  border: 2px solid #ddd;
-  border-radius: 6px;
+.qty-number{
+min-width:20px;
+text-align:center;
 }
 
 /* REMOVE */
-.remove-btn {
-  background: none;
-  border: none;
-  color: #ff4444;
-  font-size: 14px;
-  cursor: pointer;
-  text-decoration: underline;
+
+.remove{
+border:none;
+background:none;
+color:#e53935;
+font-size:13px;
+cursor:pointer;
+text-decoration:underline;
 }
 
 /* SUMMARY */
-.cart-summary {
-  margin-top: 30px;
-  padding: 20px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+
+.summary{
+margin-top:30px;
+background:white;
+padding:20px;
+border-radius:16px;
+box-shadow:0 4px 16px rgba(0,0,0,0.08);
 }
 
-.cart-summary p {
-  font-size: 20px;
-  margin-bottom: 20px;
+.summary-row{
+display:flex;
+justify-content:space-between;
+font-size:18px;
+margin-bottom:15px;
 }
 
-.checkout-btn {
-  display: block;
-  text-align: center;
-  padding: 14px 0;
-  background: #c62828;
-  color: white;
-  border-radius: 12px;
-  text-decoration: none;
-  font-size: 18px;
-  font-weight: 700;
+/* CHECKOUT BUTTON */
+
+.checkout-btn{
+width:100%;
+padding:14px;
+border:none;
+background:#c62828;
+color:white;
+border-radius:10px;
+font-size:16px;
+cursor:pointer;
+}
+
+/* EMPTY */
+
+.empty{
+text-align:center;
+font-size:18px;
+padding:40px;
 }
 
 /* MOBILE */
-/* MOBILE SPLIT CARD FIX */
-@media (max-width: 768px) {
-  .cart-items {
-    grid-template-columns: 1fr;
-  }
-  .menu-card {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 14px;
-    text-align: left;
-    padding: 12px;
-  }
 
-  .menu-img {
-    width: 110px;
-    height: 110px;
-    border-radius: 12px;
-    object-fit: cover;
-  }
+@media(max-width:768px){
 
-  .menu-info {
-    flex: 1;
-  }
-
-  .menu-info h3 {
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-
-  .row-info {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 6px;
-  }
-
-  .price {
-    font-size: 16px;
-    font-weight: 700;
-  }
-
-  .qty-row {
-    gap: 6px;
-  }
-
-  .qty-btn {
-    width: 26px;
-    height: 26px;
-    font-size: 18px;
-    border-radius: 5px;
-  }
-
-  .qty-input {
-    width: 40px;
-    font-size: 14px;
-    padding: 4px;
-  }
-
-  .addcart-btn {
-    padding: 8px 0;
-    font-size: 14px;
-    border-radius: 10px;
-  }
+.cart-items{
+grid-template-columns:1fr;
 }
-</style> 
+
+.cart-card{
+grid-template-columns:100px 1fr;
+}
+
+.cart-card img{
+width:100px;
+height:100px;
+}
+
+}
+
+</style>
+
+</head>
+
 <body>
 
-<section class="cart-page">
+<header>Your Cart</header>
 
-  <h2>Your Cart</h2>
+<div id="cartItems" class="cart-items"></div>
 
-  <div id="cartItems" class="cart-items"></div>
+<div class="summary">
 
-  <div class="cart-summary">
-    <p>Subtotal: <span id="subtotal">₹0</span></p>
-    <a href="checkout.html" class="checkout-btn">Proceed to Checkout →</a>
-  </div>
+<div class="summary-row">
+<span>Subtotal</span>
+<span id="subtotal">₹0</span>
+</div>
 
-</section>
+<button class="checkout-btn" onclick="goCheckout()">
+Proceed to Checkout →
+</button>
+
+</div>
+
 
 <script>
-/* LOAD CART FROM STORAGE */
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-const cartItemsDiv = document.getElementById("cartItems");
-const subtotalEl = document.getElementById("subtotal");
-const cartCount = document.getElementById("cartCount");
+/* CART STRUCTURE
+{name, price, image, qty}
+*/
 
-/* INITIAL RENDER */
-renderCart();
-updateCartCount();
+let cart = JSON.parse(localStorage.getItem("cart")) || []
 
+const cartBox = document.getElementById("cartItems")
+const subtotalEl = document.getElementById("subtotal")
 
-/* -------------------------
-   RENDER CART ITEMS
-------------------------- */
-function renderCart() {
+renderCart()
 
-  cartItemsDiv.innerHTML = "";
+function renderCart(){
 
-  let subtotal = 0;
+cartBox.innerHTML=""
 
-  if (cart.length === 0) {
-    cartItemsDiv.innerHTML = "<p>Your cart is empty</p>";
-    subtotalEl.textContent = "₹0";
-    return;
-  }
+let total = 0
 
-  cart.forEach((item, index) => {
+if(cart.length===0){
 
-    const itemTotal = item.price * item.qty;
-
-    subtotal += itemTotal;
-
-    cartItemsDiv.innerHTML += `
-      <div class="cart-item">
-
-        <img src="${item.img}" alt="${item.name}">
-
-        <div class="cart-details">
-          <h3>${item.name}</h3>
-
-          <p class="price">₹${itemTotal}</p>
-
-          <div class="qty-row">
-
-            <button class="qty-btn minus"
-              onclick="updateQty(${index}, -1)">
-              -
-            </button>
-
-            <input
-              type="number"
-              class="qty-input"
-              min="1"
-              value="${item.qty}"
-              onchange="setQty(${index}, this.value)"
-            >
-
-            <button class="qty-btn plus"
-              onclick="updateQty(${index}, 1)">
-              +
-            </button>
-
-          </div>
-
-          <button class="remove-btn"
-            onclick="removeItem(${index})">
-            Remove
-          </button>
-
-        </div>
-
-      </div>
-    `;
-
-  });
-
-  subtotalEl.textContent = "₹" + subtotal;
+cartBox.innerHTML="<div class='empty'>Your cart is empty</div>"
+subtotalEl.innerText="₹0"
+return
 
 }
 
+cart.forEach((item,index)=>{
 
-/* -------------------------
-   UPDATE QUANTITY + / -
-------------------------- */
-function updateQty(index, change) {
+let itemTotal = item.price * item.qty
 
-  cart[index].qty += change;
+total += itemTotal
 
-  if (cart[index].qty < 1) {
-    cart[index].qty = 1;
-  }
+cartBox.innerHTML += `
 
-  saveCart();
-  renderCart();
-}
+<div class="cart-card">
 
+<img src="${item.image}">
 
-/* -------------------------
-   MANUAL QUANTITY INPUT
-------------------------- */
-function setQty(index, value) {
+<div class="cart-info">
 
-  let qty = parseInt(value);
+<h3>${item.name}</h3>
 
-  if (isNaN(qty) || qty < 1) {
-    qty = 1;
-  }
+<div class="price">₹${item.price}</div>
 
-  cart[index].qty = qty;
+<div class="qty-row">
 
-  saveCart();
-  renderCart();
-}
+<button class="qty-btn"
+onclick="changeQty(${index},-1)">−</button>
 
+<span class="qty-number">${item.qty}</span>
 
-/* -------------------------
-   REMOVE ITEM
-------------------------- */
-function removeItem(index) {
+<button class="qty-btn"
+onclick="changeQty(${index},1)">+</button>
 
-  cart.splice(index, 1);
+</div>
 
-  saveCart();
-  renderCart();
-}
+<button class="remove"
+onclick="removeItem(${index})">
+Remove
+</button>
 
+</div>
 
-/* -------------------------
-   SAVE CART
-------------------------- */
-function saveCart() {
+</div>
 
-  localStorage.setItem("cart", JSON.stringify(cart));
+`
 
-  updateCartCount();
+})
+
+subtotalEl.innerText="₹"+total
 
 }
 
+/* UPDATE QTY */
 
-/* -------------------------
-   UPDATE CART COUNT
-------------------------- */
-function updateCartCount() {
+function changeQty(index,val){
 
-  if (!cartCount) return;
+cart[index].qty += val
 
-  let totalItems = 0;
+if(cart[index].qty < 1){
+cart[index].qty = 1
+}
 
-  cart.forEach(item => {
-    totalItems += item.qty;
-  });
-
-  cartCount.textContent = totalItems;
+saveCart()
+renderCart()
 
 }
+
+/* REMOVE */
+
+function removeItem(index){
+
+cart.splice(index,1)
+
+saveCart()
+renderCart()
+
+}
+
+/* SAVE CART */
+
+function saveCart(){
+localStorage.setItem("cart",JSON.stringify(cart))
+}
+
+/* CHECKOUT */
+
+function goCheckout(){
+
+if(cart.length===0){
+alert("Cart is empty")
+return
+}
+
+window.location.href="checkout.html"
+
+}
+
 </script>
+
 </body>
 </html>

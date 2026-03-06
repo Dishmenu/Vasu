@@ -2,15 +2,15 @@
 <html>
 <head>
 
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Track Order</title>
 
 <style>
 
 body{
 font-family:Poppins,sans-serif;
-padding:40px;
 background:#fff9f3;
+padding:40px;
 text-align:center;
 }
 
@@ -20,14 +20,47 @@ padding:30px;
 border-radius:16px;
 max-width:420px;
 margin:auto;
-box-shadow:0 4px 16px rgba(0,0,0,0.1);
+box-shadow:0 4px 16px rgba(0,0,0,0.08);
+}
+
+input{
+width:100%;
+padding:12px;
+border-radius:8px;
+border:1px solid #ccc;
+margin-top:10px;
+}
+
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:10px;
+margin-top:10px;
+background:#c62828;
+color:white;
+cursor:pointer;
+}
+
+.result{
+margin-top:20px;
+text-align:left;
+background:#fff3e0;
+padding:15px;
+border-radius:10px;
+display:none;
 }
 
 .status{
-font-size:20px;
+font-size:18px;
 font-weight:600;
 color:#c62828;
 margin-top:10px;
+}
+
+.error{
+color:red;
+font-weight:500;
 }
 
 </style>
@@ -40,57 +73,118 @@ margin-top:10px;
 
 <h2>Track Order</h2>
 
-<p id="orderId">Loading...</p>
+<input id="orderInput" placeholder="Enter Order ID">
 
-<p>Status:</p>
+<button onclick="trackOrder()">Track</button>
 
-<div class="status" id="status">Loading...</div>
+<div id="resultBox" class="result"></div>
 
 </div>
+
 
 <script type="module">
 
 import { initializeApp }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
-import {
-getFirestore,
-doc,
-onSnapshot
-}
+import { getFirestore,doc,getDoc }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const app = initializeApp({
-  apiKey:"AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
-  authDomain:"reddy-gari-biryani.firebaseapp.com",
-  projectId:"reddy-gari-biryani"
-});
 
-const db = getFirestore(app);
+const firebaseConfig={
+apiKey:"AIzaSyCdKXYm3614xbdm0c7B4A9frALspQaTyko",
+authDomain:"reddy-gari-biryani.firebaseapp.com",
+projectId:"reddy-gari-biryani"
+};
 
-const params =
-new URLSearchParams(window.location.search);
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
 
-const orderId = params.get("orderId");
+const saved = localStorage.getItem("trackOrderId")
 
-document.getElementById("orderId").innerText =
-"Order ID: "+orderId;
+if(saved){
+document.getElementById("orderInput").value = saved
+trackOrder()
+}
+window.trackOrder = async function(){
 
-onSnapshot(doc(db,"orders",orderId),(snap)=>{
+const orderId=document
+.getElementById("orderInput")
+.value
+.trim()
 
-if(!snap.exists()) return;
-
-const d = snap.data();
-
-document.getElementById("status").innerText =
-d.status;
-
-});
+const box=document.getElementById("resultBox")
 
 if(!orderId){
-document.getElementById("status").innerText="Invalid Order ID";
-throw new Error("No orderId");
+alert("Enter Order ID")
+return
 }
+
+box.style.display="block"
+box.innerHTML="Checking order..."
+
+try{
+
+const orderRef = doc(db,"orders",orderId)
+
+const snap = await getDoc(doc(db,"orders",orderId))
+if(!snap.exists()){
+
+box.innerHTML="<p class='error'>Order not found</p>"
+return
+
+}
+
+const d = snap.data()
+
+let itemsHTML=""
+
+if(d.items){
+
+d.items.forEach(i=>{
+itemsHTML+=`${i.name} × ${i.qty}<br>`
+})
+
+}
+
+box.innerHTML=`
+
+<b>Order ID:</b> ${orderId}<br><br>
+
+<b>Name:</b> ${d.name || ""}<br>
+
+<b>Phone:</b> ${d.phone || ""}<br>
+
+<b>Address:</b> ${d.address || ""}<br>
+
+<b>Total:</b> ₹${d.total || 0}<br>
+
+<hr>
+
+<b>Items</b><br>
+${itemsHTML}
+
+<div class="status">
+Status: ${d.status || "pending"}
+</div>
+
+`
+
+}catch(err){
+
+console.error(err)
+
+box.innerHTML=`
+<p class='error'>
+Error loading order<br>
+Check Firebase config or Firestore rules
+</p>
+`
+
+}
+
+}
+
 </script>
 
 </body>
